@@ -6,23 +6,23 @@
     <title>Şükrü Özolgay - AI Factory</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: #25182E; color: #f8fafc; min-height: 100vh; }
+        body { background-color: #000000; color: #f8fafc; min-height: 100vh; }
         
         /* Şifre Giriş Ekranı */
         #auth-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(37, 24, 46, 0.98); backdrop-filter: blur(10px);
+            background: rgba(0, 0, 0, 0.95); backdrop-filter: blur(10px);
             display: flex; align-items: center; justify-content: center; z-index: 9999;
         }
         .auth-card {
-            background: #2d1d38; padding: 40px; border-radius: 16px;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5); width: 100%; max-width: 400px;
+            background: #111111; padding: 40px; border-radius: 16px;
+            box-shadow: 0 20px 25px -5px rgba(202, 31, 61, 0.2); width: 100%; max-width: 400px;
             text-align: center; border: 1px solid #CA1F3D;
         }
         .auth-card h2 { margin-bottom: 8px; color: #CA1F3D; font-size: 24px; }
-        .auth-card p { margin-bottom: 24px; color: #cbd5e1; font-size: 14px; }
+        .auth-card p { margin-bottom: 24px; color: #a1a1aa; font-size: 14px; }
         .auth-input {
-            width: 100%; padding: 12px 16px; background: #25182E; border: 1px solid #CA1F3D;
+            width: 100%; padding: 12px 16px; background: #000000; border: 1px solid #CA1F3D;
             border-radius: 8px; color: white; font-size: 16px; margin-bottom: 16px; outline: none;
         }
         .auth-btn {
@@ -35,41 +35,41 @@
 
         /* Ana Panel Arayüzü */
         #main-content { display: none; width: 100%; min-height: 100vh; padding: 30px; }
-        header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #3d274c; padding-bottom: 20px; margin-bottom: 30px; }
+        header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222222; padding-bottom: 20px; margin-bottom: 30px; }
         header h1 { color: #CA1F3D; font-size: 22px; }
         .logout-btn { background: #CA1F3D; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; }
         .logout-btn:hover { background: #a51831; }
 
         .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
-        .card { background: #2d1d38; border: 1px solid #3d274c; border-radius: 12px; padding: 24px; transition: transform 0.2s; display: flex; flex-direction: column; justify-content: space-between; }
+        .card { background: #111111; border: 1px solid #222222; border-radius: 12px; padding: 24px; transition: transform 0.2s; display: flex; flex-direction: column; justify-content: space-between; }
         .card:hover { transform: translateY(-3px); border-color: #CA1F3D; }
         .card h3 { color: #CA1F3D; margin-bottom: 10px; }
-        .card p { color: #cbd5e1; font-size: 14px; margin-bottom: 20px; }
+        .card p { color: #a1a1aa; font-size: 14px; margin-bottom: 20px; }
         .card-btn { background: #CA1F3D; color: white; border: none; padding: 10px 14px; border-radius: 6px; cursor: pointer; font-weight: 600; text-decoration: none; text-align: center; display: inline-block; }
         .card-btn:hover { background: #a51831; }
 
-        /* Sohbet Ekranı (Chat Modal/Penceresi) */
+        /* Sohbet Ekranı (Chat Modal) */
         #chat-modal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(37, 24, 46, 0.9); z-index: 10000; align-items: center; justify-content: center;
+            background: rgba(0, 0, 0, 0.85); z-index: 10000; align-items: center; justify-content: center;
         }
         .chat-container {
-            background: #2d1d38; width: 90%; max-width: 600px; height: 80vh; border-radius: 16px;
+            background: #111111; width: 90%; max-width: 600px; height: 80vh; border-radius: 16px;
             border: 1px solid #CA1F3D; display: flex; flex-direction: column; overflow: hidden;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+            box-shadow: 0 25px 50px -12px rgba(202, 31, 61, 0.3);
         }
         .chat-header {
-            background: #25182E; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center;
-            border-bottom: 1px solid #3d274c;
+            background: #000000; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid #222222;
         }
         .chat-header h3 { color: #CA1F3D; font-size: 18px; }
         .close-chat { background: none; border: none; color: white; font-size: 20px; cursor: pointer; }
         .chat-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
         .message { max-width: 80%; padding: 12px 16px; border-radius: 12px; font-size: 14px; line-height: 1.4; }
         .message.user { background: #CA1F3D; color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
-        .message.ai { background: #25182E; color: #f8fafc; align-self: flex-start; border-bottom-left-radius: 2px; border: 1px solid #3d274c; }
-        .chat-input-area { padding: 15px; background: #25182E; border-top: 1px solid #3d274c; display: flex; gap: 10px; }
-        .chat-input { flex: 1; padding: 10px 14px; background: #2d1d38; border: 1px solid #3d274c; border-radius: 8px; color: white; outline: none; }
+        .message.ai { background: #000000; color: #f8fafc; align-self: flex-start; border-bottom-left-radius: 2px; border: 1px solid #222222; }
+        .chat-input-area { padding: 15px; background: #000000; border-top: 1px solid #222222; display: flex; gap: 10px; }
+        .chat-input { flex: 1; padding: 10px 14px; background: #111111; border: 1px solid #222222; border-radius: 8px; color: white; outline: none; }
         .chat-input:focus { border-color: #CA1F3D; }
         .send-btn { background: #CA1F3D; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; }
         .send-btn:hover { background: #a51831; }
@@ -96,7 +96,6 @@
         </header>
 
         <div class="dashboard-grid">
-            <!-- AI Sohbet Modülü -->
             <div class="card">
                 <div>
                     <h3>AI Sohbet Asistanı</h3>
@@ -105,7 +104,6 @@
                 <button class="card-btn" onclick="openChat()">Sohbeti Başlat</button>
             </div>
             
-            <!-- Qwen Modülü -->
             <div class="card">
                 <div>
                     <h3>Qwen Image Edit Modülü</h3>
@@ -114,18 +112,17 @@
                 <a href="https://huggingface.co/spaces/prithivMLmods/Qwen-Image-Edit-2511-LoRAs-Fast" target="_blank" class="card-btn">Modülü Aç (Hugging Face)</a>
             </div>
 
-            <!-- Güvenlik Durumu -->
             <div class="card">
                 <div>
                     <h3>Güvenlik Durumu</h3>
-                    <p>Özel renk paleti (#25182E ve #CA1F3D) ve şifreleme koruması aktif.</p>
+                    <p>Tam siyah (#000000) ve kırmızı (#CA1F3D) konsepti aktif, koruma devrede.</p>
                 </div>
                 <button class="card-btn" onclick="alert('Sistem tamamen güvende ve güncel.')">Durumu Gör</button>
             </div>
         </div>
     </div>
 
-    <!-- Sohbet Penceresi (Modal) -->
+    <!-- Sohbet Penceresi -->
     <div id="chat-modal">
         <div class="chat-container">
             <div class="chat-header">
@@ -133,7 +130,7 @@
                 <button class="close-chat" onclick="closeChat()">✕</button>
             </div>
             <div class="chat-messages" id="chat-messages">
-                <div class="message ai">Merhaba Şükrü! Sana bu kontrol panelinden nasıl yardımcı olabilirim?</div>
+                <div class="message ai">Merhaba Şükrü! Siyah-kırmızı temalı yeni kontrol panelin hazır. Nasıl yardım edeyim?</div>
             </div>
             <div class="chat-input-area">
                 <input type="text" id="user-message" class="chat-input" placeholder="Mesajını yaz..." onkeypress="handleChatKey(event)">
@@ -173,7 +170,6 @@
             location.reload();
         }
 
-        /* Sohbet Fonksiyonları */
         function openChat() {
             document.getElementById("chat-modal").style.display = "flex";
         }
@@ -189,7 +185,6 @@
 
             const messagesContainer = document.getElementById("chat-messages");
 
-            // Kullanıcı mesajı
             const userMsgDiv = document.createElement("div");
             userMsgDiv.className = "message user";
             userMsgDiv.textContent = text;
@@ -198,11 +193,10 @@
             inputField.value = "";
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
-            // Yapay zeka yanıt simülasyonu
             setTimeout(() => {
                 const aiMsgDiv = document.createElement("div");
                 aiMsgDiv.className = "message ai";
-                aiMsgDiv.textContent = "Harika gidiyorsun Şükrü! Bu panel üzerinden sistemini yönetmeye ve geliştirmeye devam edebiliriz.";
+                aiMsgDiv.textContent = "Siyah ve kırmızı renklerin ağırlıkta olduğu bu yeni tasarım gerçekten çok karizmatik duruyor Şükrü! Harika ilerliyoruz.";
                 messagesContainer.appendChild(aiMsgDiv);
                 messagesContainer.scrollTop = messagesContainer.scrollHeight;
             }, 800);
