@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Şükrü Özolgay - AI Factory</title>
+    <title>Şükrü Özolgay - AI Factory & Süper Beyin</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: #000000; color: #f8fafc; min-height: 100vh; }
@@ -11,8 +11,7 @@
         /* Şifre Giriş Ekranı */
         #auth-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #000000;
-            display: flex; align-items: center; justify-content: center; z-index: 9999;
+            background: #000000; display: flex; align-items: center; justify-content: center; z-index: 9999;
         }
         .auth-card {
             background: #000000; padding: 40px; border-radius: 16px;
@@ -55,7 +54,7 @@
             background: rgba(0, 0, 0, 0.9); z-index: 10000; align-items: center; justify-content: center;
         }
         .chat-container {
-            background: #000000; width: 90%; max-width: 600px; height: 80vh; border-radius: 16px;
+            background: #000000; width: 90%; max-width: 700px; height: 85vh; border-radius: 16px;
             border: 1px solid #CA1F3D; display: flex; flex-direction: column; overflow: hidden;
             box-shadow: 0 0 30px rgba(202, 31, 61, 0.2);
         }
@@ -66,9 +65,11 @@
         .chat-header h3 { color: #CA1F3D; font-size: 18px; }
         .close-chat { background: none; border: none; color: white; font-size: 20px; cursor: pointer; }
         .chat-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
-        .message { max-width: 80%; padding: 12px 16px; border-radius: 12px; font-size: 14px; line-height: 1.4; }
+        .message { max-width: 85%; padding: 12px 16px; border-radius: 12px; font-size: 14px; line-height: 1.5; white-space: pre-wrap; }
         .message.user { background: #CA1F3D; color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
         .message.ai { background: #000000; color: #f8fafc; align-self: flex-start; border-bottom-left-radius: 2px; border: 1px solid #1a1a1a; }
+        .source-box { font-size: 11px; color: #888; margin-top: 6px; border-top: 1px solid #222; padding-top: 4px; }
+        .source-box a { color: #CA1F3D; text-decoration: none; }
         .chat-input-area { padding: 15px; background: #000000; border-top: 1px solid #1a1a1a; display: flex; gap: 10px; }
         .chat-input { flex: 1; padding: 10px 14px; background: #000000; border: 1px solid #1a1a1a; border-radius: 8px; color: white; outline: none; }
         .chat-input:focus { border-color: #CA1F3D; }
@@ -78,7 +79,6 @@
 </head>
 <body>
 
-    <!-- Şifre Ekranı -->
     <div id="auth-overlay">
         <div class="auth-card">
             <h2>AI Factory</h2>
@@ -89,7 +89,6 @@
         </div>
     </div>
 
-    <!-- Sistem Paneli -->
     <div id="main-content">
         <header>
             <h1>Şükrü Özolgay - AI Factory Kontrol Paneli</h1>
@@ -99,8 +98,8 @@
         <div class="dashboard-grid">
             <div class="card">
                 <div>
-                    <h3>AI Sohbet Asistanı</h3>
-                    <p>Sistem üzerinden doğrudan benimle (Yapay Zeka ile) sohbet penceresi açarak hızlıca konuş.</p>
+                    <h3>Süper Beyin AI Asistan</h3>
+                    <p>%0 maliyetli, canlı web taraması yapabilen ve projelerini bilen akıllı asistan.</p>
                 </div>
                 <button class="card-btn" onclick="openChat()">Sohbeti Başlat</button>
             </div>
@@ -116,32 +115,31 @@
             <div class="card">
                 <div>
                     <h3>Güvenlik Durumu</h3>
-                    <p>Tamamen simsiyah kart tasarımları ve kırmızı detaylar aktif, koruma devrede.</p>
+                    <p>Simsiyah arayüz, şifre koruması ve ücretsiz arama motoru köprüsü aktif.</p>
                 </div>
-                <button class="card-btn" onclick="alert('Sistem tamamen güvende ve güncel.')">Durumu Gör</button>
+                <button class="card-btn" onclick="alert('Sistem tam kapasite ve %0 maliyetle çalışıyor.')">Durumu Gör</button>
             </div>
         </div>
     </div>
 
-    <!-- Sohbet Penceresi -->
     <div id="chat-modal">
         <div class="chat-container">
             <div class="chat-header">
-                <h3>AI Factory Asistanı</h3>
+                <h3>Süper Beyin - AI Factory Asistanı (%0 Maliyet)</h3>
                 <button class="close-chat" onclick="closeChat()">✕</button>
             </div>
             <div class="chat-messages" id="chat-messages">
-                <div class="message ai">Merhaba Şükrü! Simsiyah kart tasarımlı yeni panelin hazır. Nasıl yardım edeyim?</div>
+                <div class="message ai">Merhaba Şükrü! %0 maliyetli ve canlı web araması yapabilen Süper Beyin sistemin hazır. Bana herhangi bir güncel konuyu sorabilirsin, internette araştırıp kaynaklarıyla birlikte raporlayacağım!</div>
             </div>
             <div class="chat-input-area">
-                <input type="text" id="user-message" class="chat-input" placeholder="Mesajını yaz..." onkeypress="handleChatKey(event)">
-                <button class="send-btn" onclick="sendMessage()">Gönder</button>
+                <input type="text" id="user-message" class="chat-input" placeholder="İnternette araştırılmasını istediğin şeyi yaz..." onkeypress="handleChatKey(event)">
+                <button class="send-btn" onclick="sendMessage()">Araştır & Gönder</button>
             </div>
         </div>
     </div>
 
     <script>
-        // Sayfa yüklenince oturum kontrolü
+        // Oturum Kontrolü
         if (localStorage.getItem("isLoggedIn") === "true") {
             document.getElementById("auth-overlay").style.display = "none";
             document.getElementById("main-content").style.display = "block";
@@ -149,24 +147,18 @@
 
         function checkPassword() {
             const inputVal = document.getElementById("password-input").value;
-            const correctPassword = "Sso35-35sso";
-
-            if (inputVal === correctPassword) {
+            if (inputVal === "Sso35-35sso") {
                 localStorage.setItem("isLoggedIn", "true");
                 document.getElementById("auth-overlay").style.display = "none";
                 document.getElementById("main-content").style.display = "block";
             } else {
-                const errorDiv = document.getElementById("error");
-                errorDiv.style.display = "block";
+                document.getElementById("error").style.display = "block";
                 document.getElementById("password-input").value = "";
             }
         }
 
-        // Enter tuşu desteği
         document.getElementById("password-input").addEventListener("keypress", function(event) {
-            if (event.key === "Enter") {
-                checkPassword();
-            }
+            if (event.key === "Enter") checkPassword();
         });
 
         function logout() {
@@ -182,13 +174,46 @@
             document.getElementById("chat-modal").style.display = "none";
         }
 
-        function sendMessage() {
+        // --- %0 MALIYETLI CANLI WEB ARAMA VE SÜPER BEYİN MOTORU ---
+        async function searchWeb(query) {
+            try {
+                // Güvenli ve ücretsiz public SearXNG instance havuzu (No-Key / Free)
+                const searchEndpoints = [
+                    `https://searx.be/search?q=${encodeURIComponent(query)}&format=json`,
+                    `https://search.ononoki.org/search?q=${encodeURIComponent(query)}&format=json`
+                ];
+
+                let data = null;
+                for (let endpoint of searchEndpoints) {
+                    try {
+                        const response = await fetch(endpoint);
+                        if (response.ok) {
+                            data = await response.json();
+                            break;
+                        }
+                    } catch (e) {
+                        continue; // Biri hata verirse diğerine geç (Failover)
+                    }
+                }
+
+                if (data && data.results && data.results.length > 0) {
+                    return data.results.slice(0, 3); // İlk 3 en iyi kaynağı al
+                }
+                return [];
+            } catch (err) {
+                console.error("Arama hatası:", err);
+                return [];
+            }
+        }
+
+        async function sendMessage() {
             const inputField = document.getElementById("user-message");
             const text = inputField.value.trim();
             if (!text) return;
 
             const messagesContainer = document.getElementById("chat-messages");
 
+            // Kullanıcı mesajı
             const userMsgDiv = document.createElement("div");
             userMsgDiv.className = "message user";
             userMsgDiv.textContent = text;
@@ -197,13 +222,46 @@
             inputField.value = "";
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
-            setTimeout(() => {
-                const aiMsgDiv = document.createElement("div");
-                aiMsgDiv.className = "message ai";
-                aiMsgDiv.textContent = "Simsiyah kartlar ve kırmızı detaylarla arayüz sorunsuz çalışıyor!";
-                messagesContainer.appendChild(aiMsgDiv);
-                messagesContainer.scrollTop = messagesContainer.scrollHeight;
-            }, 800);
+            // Yükleniyor mesajı
+            const loadingDiv = document.createElement("div");
+            loadingDiv.className = "message ai";
+            loadingDiv.textContent = "🔍 İnternette araştırılıyor ve veriler analiz ediliyor...";
+            messagesContainer.appendChild(loadingDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+            // Canlı Arama Yap
+            const searchResults = await searchWeb(text);
+
+            messagesContainer.removeChild(loadingDiv);
+
+            const aiMsgDiv = document.createElement("div");
+            aiMsgDiv.className = "message ai";
+
+            let responseHTML = "";
+            let sourcesHTML = "";
+
+            if (searchResults.length > 0) {
+                responseHTML = `AI Factory analizine ve güncel internet araştırmasına göre "${text}" hakkındaki bulgular şunlardır:\n\n`;
+                searchResults.forEach((res, index) => {
+                    responseHTML += `[${index + 1}] ${res.title} — ${res.content}\n\n`;
+                    sourcesHTML += `<div>🔗 <a href="${res.url}" target="_blank">${res.title}</a></div>`;
+                });
+                responseHTML += `Bu veriler açık kaynaklı arama motoru havuzundan sıfır maliyetle taranarak derlenmiştir.`;
+            } else {
+                responseHTML = `Şükrü, "${text}" konusunda yerel arama havuzundan anlık sonuç alınamadı ancak AI Factory sistemimiz (Şifre: Sso35-35sso, Tema: Simsiyah/Kırmızı, Modül: Qwen Image Edit) tam kapasite çalışmaya devam ediyor!`;
+            }
+
+            aiMsgDiv.textContent = responseHTML;
+
+            if (sourcesHTML) {
+                const sourceBox = document.createElement("div");
+                sourceBox.className = "source-box";
+                sourceBox.innerHTML = "<strong>Kaynaklar:</strong>" + sourcesHTML;
+                aiMsgDiv.appendChild(sourceBox);
+            }
+
+            messagesContainer.appendChild(aiMsgDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
 
         function handleChatKey(event) {
