@@ -97,7 +97,7 @@
             <div class="card">
                 <div>
                     <h3>Süper Beyin AI Asistan</h3>
-                    <p>Apisiz, tamamen yerel çalışan ve güvenli web arama köprülerini kullanan akıllı asistan motoru.</p>
+                    <p>Apisiz, tamamen dinamik çalışan ve anlık internet verilerini tarayan akıllı sorgu motoru.</p>
                 </div>
                 <button class="card-btn" onclick="openChat()">Sohbeti Başlat</button>
             </div>
@@ -113,9 +113,9 @@
             <div class="card">
                 <div>
                     <h3>Güvenlik Durumu</h3>
-                    <p>SHA-256 kriptografik koruma ve XSS güvenlik süzgeci aktif. Oturumlar güvenli bellektedir.</p>
+                    <p>SHA-256 kriptografik koruma, sessionStorage oturum güvenliği ve XSS filtresi aktif.</p>
                 </div>
-                <button class="card-btn" onclick="alert('Sistem en üst düzey güvenlik mimarisiyle korunmaktadır.')">Durumu Gör</button>
+                <button class="card-btn" onclick="alert('Sistem tam güvenli ve dinamik moddadır.')">Durumu Gör</button>
             </div>
         </div>
     </div>
@@ -127,17 +127,16 @@
                 <button class="close-chat" onclick="closeChat()">✕</button>
             </div>
             <div class="chat-messages" id="chat-messages">
-                <div class="message ai">Merhaba Şükrü! Sistem en güvenli mimariyle yapılandırıldı ve emrindeyim. Ne araştırmamızı istersin?</div>
+                <div class="message ai">Süper Beyin aktif. Sorduğun her soruyu anlık olarak internetten tarayıp senin için getireceğim.</div>
             </div>
             <div class="chat-input-area">
-                <input type="text" id="user-message" class="chat-input" placeholder="Komutunu veya araştırılacak konuyu yaz..." onkeypress="handleChatKey(event)">
-                <button class="send-btn" onclick="sendMessage()">Gönder / Çalıştır</button>
+                <input type="text" id="user-message" class="chat-input" placeholder="Ne araştırmamı istiyorsun?" onkeypress="handleChatKey(event)">
+                <button class="send-btn" onclick="sendMessage()">Gönder / Araştır</button>
             </div>
         </div>
     </div>
 
     <script>
-        // Şifre açık metin olarak asla tutulmaz, sadece SHA-256 hash'i bulunur.
         const SECURE_HASH = "8c35105267b2d56a350c3792c30084ab753c139c878f877fb0c9ffef604d55cc";
 
         async function hashString(string) {
@@ -148,7 +147,6 @@
             return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
         }
 
-        // sessionStorage kullanarak sekme kapandığında oturumun güvenle silinmesi sağlanır
         if (sessionStorage.getItem("isLoggedIn") === "true") {
             document.getElementById("auth-overlay").style.display = "none";
             document.getElementById("main-content").style.display = "block";
@@ -185,18 +183,15 @@
             document.getElementById("chat-modal").style.display = "none";
         }
 
-        // XSS Korumalı Güvenli Metin ve Kaynak Oluşturucu
         function appendSafeMessage(sender, text, sources = []) {
             const messagesContainer = document.getElementById("chat-messages");
-            
             const msgDiv = document.createElement("div");
             msgDiv.className = `message ${sender}`;
-            msgDiv.textContent = text; // XSS engellemek için doğrudan textContent kullanılır
+            msgDiv.textContent = text;
             
             if (sources && sources.length > 0) {
                 const sourceBox = document.createElement("div");
                 sourceBox.className = "source-box";
-                
                 const titleStrong = document.createElement("strong");
                 titleStrong.textContent = "Kaynaklar:";
                 sourceBox.appendChild(titleStrong);
@@ -211,7 +206,6 @@
                     sourceBox.appendChild(link);
                     sourceBox.appendChild(document.createElement("br"));
                 });
-                
                 msgDiv.appendChild(sourceBox);
             }
 
@@ -219,7 +213,6 @@
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
 
-        // Güvenli Apisiz Web Arama Motoru
         async function searchWeb(query) {
             try {
                 const url = `https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json&no_html=1&skip_disambig=1`;
@@ -228,10 +221,10 @@
                 
                 let results = [];
                 if (data.RelatedTopics && data.RelatedTopics.length > 0) {
-                    data.RelatedTopics.slice(0, 3).forEach(item => {
+                    data.RelatedTopics.slice(0, 4).forEach(item => {
                         if (item.Text && item.FirstURL) {
                             results.push({
-                                title: item.Text.split(' - ')[0] || "İnternet Kaynağı",
+                                title: item.Text.split(' - ')[0] || "Güncel Kaynak",
                                 content: item.Text,
                                 url: item.FirstURL
                             });
@@ -240,7 +233,7 @@
                 }
                 return results;
             } catch (err) {
-                console.error("Arama motoru güvenli erişim hatası:", err);
+                console.error("Arama motoru hatası:", err);
                 return [];
             }
         }
@@ -253,16 +246,10 @@
             appendSafeMessage("user", text);
             inputField.value = "";
 
-            const lower = text.toLowerCase();
-            if (lower.includes("selam") || lower.includes("kimsin") || lower.includes("merhaba")) {
-                appendSafeMessage("ai", "Merhaba Şükrü! Sistem en üst düzey SHA-256 ve XSS güvenlik önlemleriyle çalışmaktadır. Sana nasıl yardımcı olabilirim?");
-                return;
-            }
-
             const messagesContainer = document.getElementById("chat-messages");
             const loadingDiv = document.createElement("div");
             loadingDiv.className = "message ai";
-            loadingDiv.textContent = "🔍 Süper Beyin güvenli tarama gerçekleştiriyor...";
+            loadingDiv.textContent = "🔍 Süper Beyin interneti tarıyor...";
             messagesContainer.appendChild(loadingDiv);
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
@@ -270,13 +257,13 @@
             messagesContainer.removeChild(loadingDiv);
 
             if (searchResults.length > 0) {
-                let combinedText = `Şükrü, "${text}" ile ilgili ulaştığım güncel bulgular:\n\n`;
+                let combinedText = `Şükrü, sorduğun "${text}" konusu ile ilgili ulaştığım güncel bilgiler:\n\n`;
                 searchResults.forEach((res) => {
                     combinedText += `• ${res.content}\n\n`;
                 });
                 appendSafeMessage("ai", combinedText, searchResults);
             } else {
-                appendSafeMessage("ai", `Şükrü, "${text}" araması için doğrudan eşleşen harici veri bulunamadı. Farklı anahtar kelimelerle tekrar deneyebilirsin.`);
+                appendSafeMessage("ai", `Şükrü, "${text"}" araması için doğrudan eşleşen net bir internet verisi bulamadım. Farklı anahtar kelimelerle tekrar deneyebilirsin.`);
             }
         }
 
