@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ŞükrüÖzolgay - AI Projects</title>
+    <title>ŞükrüÖzolgay - Autonomous AI Agent Factory</title>
     <style>
         :root {
             --bg-color: #0f0f12;
             --card-bg: #18181c;
             --accent-color: #d81b60;
             --accent-hover: #b7154f;
+            --agent-active: #00e676;
             --text-main: #ffffff;
             --text-sub: #a0a0ab;
             --border-color: #2a2a32;
@@ -71,10 +72,6 @@
             font-weight: bold;
         }
 
-        .btn-new-project:hover {
-            background-color: var(--accent-hover);
-        }
-
         .project-list {
             flex: 1;
             overflow-y: auto;
@@ -92,14 +89,6 @@
             color: var(--text-sub);
             border: 1px solid transparent;
             transition: all 0.2s;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .project-item:hover {
-            background-color: rgba(255, 255, 255, 0.03);
-            color: var(--text-main);
         }
 
         .project-item.active {
@@ -147,11 +136,6 @@
             font-size: 0.85rem;
         }
 
-        .header-actions button:hover {
-            color: var(--text-main);
-            border-color: var(--accent-color);
-        }
-
         .chat-box {
             flex: 1;
             padding: 20px;
@@ -162,7 +146,7 @@
         }
 
         .message {
-            max-width: 80%;
+            max-width: 85%;
             padding: 12px 16px;
             border-radius: 10px;
             line-height: 1.5;
@@ -181,6 +165,23 @@
             background-color: #222228;
             border: 1px solid var(--border-color);
             color: var(--text-main);
+        }
+
+        .agent-status {
+            align-self: center;
+            background: rgba(0, 230, 118, 0.1);
+            border: 1px solid var(--agent-active);
+            color: var(--agent-active);
+            font-size: 0.85rem;
+            padding: 6px 14px;
+            border-radius: 20px;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
         }
 
         .input-container {
@@ -208,10 +209,6 @@
             outline: none;
         }
 
-        input[type="text"]:focus {
-            border-color: var(--accent-color);
-        }
-
         button.btn-send {
             background-color: var(--accent-color);
             color: #fff;
@@ -220,11 +217,6 @@
             border-radius: 8px;
             font-weight: bold;
             cursor: pointer;
-            transition: background-color 0.2s;
-        }
-
-        button.btn-send:hover {
-            background-color: var(--accent-hover);
         }
 
         .file-upload-btn {
@@ -235,36 +227,11 @@
             border-radius: 6px;
             cursor: pointer;
             font-size: 0.85rem;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
         }
 
-        .file-upload-btn:hover {
-            border-color: var(--accent-color);
-            color: #fff;
-        }
-
-        #file-input {
-            display: none;
-        }
-
-        .preview-area {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 0.85rem;
-            color: var(--accent-color);
-        }
-
-        .memory-badge {
-            font-size: 0.8rem;
-            color: var(--text-sub);
-            background: #222228;
-            padding: 4px 8px;
-            border-radius: 4px;
-            border: 1px solid var(--border-color);
-        }
+        #file-input { display: none; }
+        .preview-area { display: flex; align-items: center; gap: 10px; font-size: 0.85rem; color: var(--accent-color); }
+        .memory-badge { font-size: 0.8rem; color: var(--text-sub); background: #222228; padding: 4px 8px; border-radius: 4px; border: 1px solid var(--border-color); }
     </style>
 </head>
 <body>
@@ -272,7 +239,7 @@
 <div class="layout-container">
     <div class="sidebar">
         <div class="sidebar-header">
-            <h3>Projeler</h3>
+            <h3>Ajan Projeleri</h3>
             <button class="btn-new-project" onclick="createNewProject()">+ Yeni Proje</button>
         </div>
         <div class="project-list" id="projectList"></div>
@@ -280,7 +247,7 @@
 
     <div class="chat-main">
         <div class="header">
-            <h2 id="activeProjectTitle">ŞükrüÖzolgay - AI Projects</h2>
+            <h2 id="activeProjectTitle">ŞükrüÖzolgay - AI Agent</h2>
             <div class="header-actions">
                 <span class="memory-badge" id="memory-count">Global Hafıza: 0 Bilgi</span>
                 <button onclick="setApiKey()">🔑 API Key Gir</button>
@@ -289,21 +256,21 @@
         </div>
 
         <div class="chat-box" id="chatBox">
-            <div class="message ai-message">Merhaba! Model sürümü güncellendi (Gemini 2.5 Flash). Sorularınızı ve projelerinizi yönetmeye başlayabilirsiniz.</div>
+            <div class="message ai-message">🤖 Otonom Ajan Modu Aktif. Görevi verin; sistem kendi kendini denetleyip düzeltmeler yaparak bitirene kadar çalışacaktır.</div>
         </div>
 
         <div class="input-container">
             <div class="preview-area" id="previewArea" style="display: none;">
-                <span>📷 Seçilen Görsel: <strong id="fileName"></strong></span>
+                <span>📷 Görsel: <strong id="fileName"></strong></span>
                 <button onclick="cancelImage()" style="background:none; border:none; color:red; cursor:pointer;">✖</button>
             </div>
             <div class="input-row">
                 <label class="file-upload-btn">
-                    📁 Görsel Yükle
+                    📁 Görsel
                     <input type="file" id="file-input" accept="image/*" onchange="handleFileSelect(event)">
                 </label>
-                <input type="text" id="userInput" placeholder="Mesajınızı yazın veya projeyi yönlendirin..." onkeypress="handleKeyPress(event)">
-                <button class="btn-send" onclick="sendMessage()">Gönder</button>
+                <input type="text" id="userInput" placeholder="Görev tanımını yazın (Ajan işi bitirene kadar çalışır)..." onkeypress="handleKeyPress(event)">
+                <button class="btn-send" onclick="startAgentWorkflow()">Ajanı Çalıştır</button>
             </div>
         </div>
     </div>
@@ -313,13 +280,10 @@
     let selectedImageBase64 = null;
     let selectedImageType = null;
 
-    function getApiKey() {
-        return (localStorage.getItem("gemini_api_key") || "").trim();
-    }
+    function getApiKey() { return (localStorage.getItem("gemini_api_key") || "").trim(); }
 
     function setApiKey() {
-        const currentKey = getApiKey();
-        const key = prompt("Google Gemini API Key giriniz:", currentKey);
+        const key = prompt("Google Gemini API Key giriniz:", getApiKey());
         if (key !== null) {
             localStorage.setItem("gemini_api_key", key.trim());
             alert("API Key kaydedildi!");
@@ -335,13 +299,8 @@
         return projects;
     }
 
-    function saveProjects(projects) {
-        localStorage.setItem("sukru_ai_projects", JSON.stringify(projects));
-    }
-
-    function getActiveProject() {
-        return localStorage.getItem("sukru_active_project") || "Varsayılan Proje";
-    }
+    function saveProjects(projects) { localStorage.setItem("sukru_ai_projects", JSON.stringify(projects)); }
+    function getActiveProject() { return localStorage.getItem("sukru_active_project") || "Varsayılan Proje"; }
 
     function setActiveProject(projectName) {
         localStorage.setItem("sukru_active_project", projectName);
@@ -349,10 +308,7 @@
         loadChatHistory();
     }
 
-    function getGlobalMemory() {
-        return JSON.parse(localStorage.getItem("sukru_global_knowledge")) || [];
-    }
-
+    function getGlobalMemory() { return JSON.parse(localStorage.getItem("sukru_global_knowledge")) || []; }
     function saveGlobalMemory(data) {
         const memory = getGlobalMemory();
         memory.push(data);
@@ -364,13 +320,11 @@
         if(confirm("Tüm ortak hafıza silinecek. Emin misiniz?")) {
             localStorage.removeItem("sukru_global_knowledge");
             updateMemoryCount();
-            alert("Global hafıza sıfırlandı.");
         }
     }
 
     function updateMemoryCount() {
-        const count = getGlobalMemory().length;
-        document.getElementById("memory-count").innerText = `Global Hafıza: ${count} Bilgi`;
+        document.getElementById("memory-count").innerText = `Global Hafıza: ${getGlobalMemory().length} Bilgi`;
     }
 
     function renderProjectsList() {
@@ -386,7 +340,6 @@
             item.onclick = () => setActiveProject(projName);
             listContainer.appendChild(item);
         }
-
         document.getElementById("activeProjectTitle").innerText = `Proje: ${activeProj}`;
     }
 
@@ -395,10 +348,9 @@
         const activeProj = getActiveProject();
         const chatBox = document.getElementById("chatBox");
         chatBox.innerHTML = "";
-
         const history = projects[activeProj] || [];
         if (history.length === 0) {
-            addMessageToDOM("ai", `"${activeProj}" projesine hoş geldiniz! Sorularınızı sorabilirsiniz.`);
+            addMessageToDOM("ai", `"${activeProj}" projesi için Otonom Ajan hazır.`);
         } else {
             history.forEach(msg => addMessageToDOM(msg.sender, msg.text));
         }
@@ -407,13 +359,8 @@
     function createNewProject() {
         const projName = prompt("Yeni proje adını giriniz:");
         if (!projName) return;
-
         const projects = getProjects();
-        if (projects[projName]) {
-            alert("Bu isimde bir proje zaten var!");
-            return;
-        }
-
+        if (projects[projName]) return alert("Bu isimde bir proje var!");
         projects[projName] = [];
         saveProjects(projects);
         setActiveProject(projName);
@@ -422,7 +369,6 @@
     function handleFileSelect(event) {
         const file = event.target.files[0];
         if (!file) return;
-
         selectedImageType = file.type;
         const reader = new FileReader();
         reader.onload = function(e) {
@@ -440,9 +386,7 @@
         document.getElementById("previewArea").style.display = "none";
     }
 
-    function handleKeyPress(event) {
-        if (event.key === "Enter") sendMessage();
-    }
+    function handleKeyPress(event) { if (event.key === "Enter") startAgentWorkflow(); }
 
     function addMessageToDOM(sender, text) {
         const chatBox = document.getElementById("chatBox");
@@ -451,92 +395,102 @@
         msgDiv.innerText = text;
         chatBox.appendChild(msgDiv);
         chatBox.scrollTop = chatBox.scrollHeight;
+        return msgDiv;
+    }
+
+    function addAgentStatus(text) {
+        const chatBox = document.getElementById("chatBox");
+        const statusDiv = document.createElement("div");
+        statusDiv.className = "agent-status";
+        statusDiv.innerText = text;
+        chatBox.appendChild(statusDiv);
+        chatBox.scrollTop = chatBox.scrollHeight;
+        return statusDiv;
     }
 
     function saveMessageToActiveProject(sender, text) {
         const projects = getProjects();
         const activeProj = getActiveProject();
         if (!projects[activeProj]) projects[activeProj] = [];
-        
         projects[activeProj].push({ sender, text });
         saveProjects(projects);
     }
 
-    async function sendMessage() {
+    async function callGeminiAPI(systemPrompt, userParts, apiKey) {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                systemInstruction: { parts: [{ text: systemPrompt }] },
+                contents: [{ role: "user", parts: userParts }]
+            })
+        });
+        return await response.json();
+    }
+
+    async function startAgentWorkflow() {
         const inputField = document.getElementById("userInput");
-        const promptText = inputField.value.trim();
+        const userTask = inputField.value.trim();
         const apiKey = getApiKey();
 
-        if (!apiKey) {
-            alert("Lütfen önce 'API Key Gir' butonuna tıklayarak Gemini API Key'inizi tanımlayın!");
-            return;
-        }
+        if (!apiKey) return alert("Lütfen önce API Key tanımlayın!");
+        if (!userTask && !selectedImageBase64) return;
 
-        if (!promptText && !selectedImageBase64) return;
-
-        let userMsg = promptText || "[Görsel yüklendi ve analiz ediliyor...]";
-        addMessageToDOM("user", userMsg);
-        saveMessageToActiveProject("user", userMsg);
+        addMessageToDOM("user", userTask || "[Görsel Ajan Analizine Gönderildi]");
+        saveMessageToActiveProject("user", userTask);
         inputField.value = "";
 
         const currentImage = selectedImageBase64;
         const currentImageType = selectedImageType;
         cancelImage();
 
-        addMessageToDOM("ai", "Düşünüyor ve yanıt hazırlanıyor...");
+        const activeProj = getActiveProject();
+        const globalMemory = JSON.stringify(getGlobalMemory());
+
+        // --- AJAN DÖNGÜSÜ (AGENTIC LOOP) ---
+        let statusNode = addAgentStatus("🔄 Adım 1: Ajan görevi analiz ediyor ve ilk çözümü hazırlıyor...");
 
         try {
-            const activeProj = getActiveProject();
-            const projects = getProjects();
-            const currentProjectHistory = JSON.stringify(projects[activeProj] || []);
-            const globalMemoryContext = JSON.stringify(getGlobalMemory());
+            // 1. ADIM: İlk Çözüm/Taslak Üretimi
+            const systemPrompt1 = `Sen ŞükrüÖzolgay - AI Factory sisteminin Otonom Ajanısın.
+Görev: "${userTask}". Aktif Proje: "${activeProj}". Global Hafıza: ${globalMemory}.
+Görevi en ince ayrıntısına kadar eksiksiz şekilde çöz ve tam bir sonuç sun.`;
 
-            const systemPrompt = `Sen ŞükrüÖzolgay - AI Projects sisteminin gelişmiş proje asistanısın.
-Aktif Proje Adı: "${activeProj}"
-Geçmiş Sohbetler: ${currentProjectHistory}
-Global Hafıza: ${globalMemoryContext}`;
+            let parts1 = [];
+            if (currentImage) parts1.push({ inline_data: { mime_type: currentImageType, data: currentImage } });
+            parts1.push({ text: userTask || "Görseli derinlemesine analiz et ve strateji oluştur." });
 
-            let userParts = [];
+            const data1 = await callGeminiAPI(systemPrompt1, parts1, apiKey);
+            let firstDraft = data1.candidates?.[0]?.content?.parts?.[0]?.text;
+
+            if (!firstDraft) throw new Error(data1.error?.message || "İlk yanıt alınamadı.");
+
+            // 2. ADIM: Otonom Öz-Denetim ve İyileştirme Döngüsü
+            statusNode.innerText = "🔍 Adım 2: Ajan kendi ürettiği yanıtı denetliyor ve eksikleri düzeltiyor...";
+
+            const systemPrompt2 = `Sen sert bir AI Denetçisi ve Kalite Kontrolörsün.
+Kullanıcı Görevi: "${userTask}"
+Üretilen Taslak Yanıt: "${firstDraft}"
+
+Bu yanıtı incele. Herhangi bir eksiklik, mantık hatası veya yetersiz alan varsa tamamla. Sonuç mükemmel ve eksiksiz olana kadar revize edilmiş nihai raporu/çözümü sun.`;
+
+            const data2 = await callGeminiAPI(systemPrompt2, [{ text: "Taslağı denetle, tüm hataları gider ve son mükemmel versiyonu sun." }], apiKey);
+            let finalOutput = data2.candidates?.[0]?.content?.parts?.[0]?.text || firstDraft;
+
+            statusNode.remove(); // Durum göstergesini kaldır
+
+            // Başarılı Sonucu Ekrana Bas
+            addMessageToDOM("ai", `✅ [Ajan Görevi Tamamladı]\n\n${finalOutput}`);
+            saveMessageToActiveProject("ai", finalOutput);
+
             if (currentImage) {
-                userParts.push({ inline_data: { mime_type: currentImageType, data: currentImage } });
-                userParts.push({ text: promptText || "Görseldeki tüm detayları ve stratejileri analiz et." });
-            } else {
-                userParts.push({ text: promptText });
-            }
-
-            // GÜNCELLENEN MODEL URL: gemini-2.5-flash
-            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    systemInstruction: { parts: [{ text: systemPrompt }] },
-                    contents: [{ role: "user", parts: userParts }]
-                })
-            });
-
-            const data = await response.json();
-            
-            const chatBox = document.getElementById("chatBox");
-            if (chatBox.lastChild) chatBox.removeChild(chatBox.lastChild);
-
-            if (response.ok && data.candidates && data.candidates[0]?.content?.parts[0]?.text) {
-                const aiReply = data.candidates[0].content.parts[0].text;
-                addMessageToDOM("ai", aiReply);
-                saveMessageToActiveProject("ai", aiReply);
-
-                if (currentImage) {
-                    saveGlobalMemory({ project: activeProj, date: new Date().toLocaleDateString('tr-TR'), summary: aiReply });
-                }
-            } else {
-                const errMessage = data.error?.message || "Bilinmeyen API Hatası";
-                addMessageToDOM("ai", `⚠️ API Hatası (${response.status}): ${errMessage}`);
+                saveGlobalMemory({ project: activeProj, date: new Date().toLocaleDateString('tr-TR'), summary: finalOutput });
             }
 
         } catch (error) {
+            if (statusNode) statusNode.remove();
             console.error(error);
-            const chatBox = document.getElementById("chatBox");
-            if (chatBox.lastChild) chatBox.removeChild(chatBox.lastChild);
-            addMessageToDOM("ai", "⚠️ Ağ / Bağlantı Hatası: Lütfen internet bağlantınızı kontrol edin.");
+            addMessageToDOM("ai", `⚠️ Ajan İşlem Hatası: ${error.message}`);
         }
     }
 
