@@ -137,16 +137,7 @@
     </div>
 
     <script>
-        // Sso35-35sso şifresinin doğru SHA-256 hash karşılığı buraya sabitlenmiştir:
-        const SECURE_HASH = "b08c908581e14945d81b8ae7bb0338f32ac3b794f6e52230b050c99a4fb1c6b1";
-
-        async function hashString(string) {
-            const encoder = new TextEncoder();
-            const data = encoder.encode(string.trim());
-            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-            const hashArray = Array.from(new Uint8Array(hashBuffer));
-            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-        }
+        const CORRECT_PASSWORD = "Sso35-35sso";
 
         if (sessionStorage.getItem("isLoggedIn") === "true") {
             document.getElementById("auth-overlay").style.display = "none";
@@ -154,10 +145,32 @@
         }
 
         async function checkPassword() {
-            const inputVal = document.getElementById("password-input").value;
-            const inputHash = await hashString(inputVal);
+            const inputVal = document.getElementById("password-input").value.trim();
             
-            if (inputHash === SECURE_HASH) {
+            // Hem güvenli HTTPS ortamında SHA-256 kontrolü hem de yerel testler için güvenli doğrulama
+            let isValid = false;
+            try {
+                if (window.crypto && window.crypto.subtle) {
+                    const encoder = new TextEncoder();
+                    const data = encoder.encode(inputVal);
+                    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+                    const hashArray = Array.from(new Uint8Array(hashBuffer));
+                    const inputHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+                    // Sso35-35sso hash değeri
+                    if (inputHash === "b08c908581e14945d81b8ae7bb0338f32ac3b794f6e52230b050c99a4fb1c6b1") {
+                        isValid = true;
+                    }
+                }
+            } catch (e) {
+                console.warn("Kripto motoru yerel istisna:", e);
+            }
+
+            // Doğrudan metin eşleşme fallback mekanizması (yerel testler ve tarayıcı kısıtlamaları için)
+            if (inputVal === CORRECT_PASSWORD) {
+                isValid = true;
+            }
+
+            if (isValid) {
                 sessionStorage.setItem("isLoggedIn", "true");
                 document.getElementById("auth-overlay").style.display = "none";
                 document.getElementById("main-content").style.display = "block";
