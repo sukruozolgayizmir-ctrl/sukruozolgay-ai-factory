@@ -26,17 +26,96 @@
             min-height: 100vh;
         }
 
-        .modal-overlay {
+        .layout-container {
             width: 100%;
-            max-width: 900px;
+            max-width: 1100px;
             height: 90vh;
             background-color: var(--card-bg);
             border: 1px solid var(--border-color);
             border-radius: 12px;
             display: flex;
-            flex-direction: column;
             box-shadow: 0 8px 32px rgba(0,0,0,0.5);
             overflow: hidden;
+        }
+
+        /* Sol Proje Paneli */
+        .sidebar {
+            width: 260px;
+            background-color: #121215;
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            padding: 16px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sidebar-header h3 {
+            margin: 0;
+            font-size: 0.95rem;
+            color: var(--text-sub);
+        }
+
+        .btn-new-project {
+            background-color: var(--accent-color);
+            color: #fff;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .btn-new-project:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .project-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .project-item {
+            padding: 10px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            color: var(--text-sub);
+            border: 1px solid transparent;
+            transition: all 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .project-item:hover {
+            background-color: rgba(255, 255, 255, 0.03);
+            color: var(--text-main);
+        }
+
+        .project-item.active {
+            background-color: rgba(216, 27, 96, 0.15);
+            border-color: var(--accent-color);
+            color: var(--text-main);
+            font-weight: 600;
+        }
+
+        /* Sağ Chat Alanı */
+        .chat-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: var(--card-bg);
         }
 
         .header {
@@ -52,6 +131,12 @@
             margin: 0;
             font-size: 1.25rem;
             color: var(--accent-color);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
         }
 
         .header-actions button {
@@ -107,12 +192,6 @@
             display: flex;
             flex-direction: column;
             gap: 10px;
-        }
-
-        .controls-row {
-            display: flex;
-            gap: 10px;
-            align-items: center;
         }
 
         .input-row {
@@ -192,32 +271,46 @@
 </head>
 <body>
 
-<div class="modal-overlay">
-    <div class="header">
-        <h2>ŞükrüÖzolgay - AI Projects</h2>
-        <div class="header-actions">
-            <span class="memory-badge" id="memory-count">Hafıza: 0 Bilgi</span>
-            <button onclick="setApiKey()">🔑 API Key Gir</button>
-            <button onclick="clearMemory()">🗑️ Hafızayı Temizle</button>
+<div class="layout-container">
+    <!-- Sol Taraf: Projeler ve Sohbet Oturumları -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h3>Projeler</h3>
+            <button class="btn-new-project" onclick="createNewProject()">+ Yeni Proje</button>
+        </div>
+        <div class="project-list" id="projectList">
+            <!-- Dinamik Projeler Buraya Gelecek -->
         </div>
     </div>
 
-    <div class="chat-box" id="chatBox">
-        <div class="message ai-message">Merhaba! Ben ŞükrüÖzolgay AI Asistanı. Görsel yükleyerek hafızama bilgi ekleyebilir veya bana istediğin soruları sorabilirsin.</div>
-    </div>
-
-    <div class="input-container">
-        <div class="preview-area" id="previewArea" style="display: none;">
-            <span>📷 Seçilen Görsel: <strong id="fileName"></strong></span>
-            <button onclick="cancelImage()" style="background:none; border:none; color:red; cursor:pointer;">✖</button>
+    <!-- Sağ Taraf: Aktif Proje Sohbet Ekranı -->
+    <div class="chat-main">
+        <div class="header">
+            <h2 id="activeProjectTitle">ŞükrüÖzolgay - AI Projects</h2>
+            <div class="header-actions">
+                <span class="memory-badge" id="memory-count">Global Hafıza: 0 Bilgi</span>
+                <button onclick="setApiKey()">🔑 API Key Gir</button>
+                <button onclick="clearGlobalMemory()">🗑️ Hafızayı Sıfırla</button>
+            </div>
         </div>
-        <div class="input-row">
-            <label class="file-upload-btn">
-                📁 Görsel Yükle
-                <input type="file" id="file-input" accept="image/*" onchange="handleFileSelect(event)">
-            </label>
-            <input type="text" id="userInput" placeholder="Mesajınızı yazın veya görsel hakkında soru sorun..." onkeypress="handleKeyPress(event)">
-            <button class="btn-send" onclick="sendMessage()">Gönder / Araştır</button>
+
+        <div class="chat-box" id="chatBox">
+            <div class="message ai-message">Merhaba! Projelerinizi soldan seçebilir veya yeni bir proje açarak kaldığınız yerden devam edebilirsiniz. Yüklediğiniz görseller ve tüm aşamalar her zaman hatırlanır.</div>
+        </div>
+
+        <div class="input-container">
+            <div class="preview-area" id="previewArea" style="display: none;">
+                <span>📷 Seçilen Görsel: <strong id="fileName"></strong></span>
+                <button onclick="cancelImage()" style="background:none; border:none; color:red; cursor:pointer;">✖</button>
+            </div>
+            <div class="input-row">
+                <label class="file-upload-btn">
+                    📁 Görsel Yükle
+                    <input type="file" id="file-input" accept="image/*" onchange="handleFileSelect(event)">
+                </label>
+                <input type="text" id="userInput" placeholder="Mesajınızı yazın veya projeyi kaldığı yerden yönlendirin..." onkeypress="handleKeyPress(event)">
+                <button class="btn-send" onclick="sendMessage()">Gönder</button>
+            </div>
         </div>
     </div>
 </div>
@@ -226,7 +319,7 @@
     let selectedImageBase64 = null;
     let selectedImageType = null;
 
-    // LocalStorage Hazırlığı
+    // LocalStorage Tabanlı Veri Yönetimi
     function getApiKey() {
         return localStorage.getItem("gemini_api_key") || "";
     }
@@ -240,31 +333,106 @@
         }
     }
 
-    function getMemory() {
-        return JSON.parse(localStorage.getItem("ai_knowledge_base")) || [];
+    // Projeler ve Mesaj Geçmişi Veri Yapısı
+    function getProjects() {
+        let projects = JSON.parse(localStorage.getItem("sukru_ai_projects"));
+        if (!projects) {
+            projects = {
+                "Varsayılan Proje": []
+            };
+            localStorage.setItem("sukru_ai_projects", JSON.stringify(projects));
+        }
+        return projects;
     }
 
-    function saveMemory(data) {
-        const memory = getMemory();
+    function saveProjects(projects) {
+        localStorage.setItem("sukru_ai_projects", JSON.stringify(projects));
+    }
+
+    function getActiveProject() {
+        return localStorage.getItem("sukru_active_project") || "Varsayılan Proje";
+    }
+
+    function setActiveProject(projectName) {
+        localStorage.setItem("sukru_active_project", projectName);
+        renderProjectsList();
+        loadChatHistory();
+    }
+
+    function getGlobalMemory() {
+        return JSON.parse(localStorage.getItem("sukru_global_knowledge")) || [];
+    }
+
+    function saveGlobalMemory(data) {
+        const memory = getGlobalMemory();
         memory.push(data);
-        localStorage.setItem("ai_knowledge_base", JSON.stringify(memory));
+        localStorage.setItem("sukru_global_knowledge", JSON.stringify(memory));
         updateMemoryCount();
     }
 
-    function clearMemory() {
-        if(confirm("Tüm yerel hafıza silinecek. Emin misiniz?")) {
-            localStorage.removeItem("ai_knowledge_base");
+    function clearGlobalMemory() {
+        if(confirm("Tüm ortak hafıza silinecek. Emin misiniz?")) {
+            localStorage.removeItem("sukru_global_knowledge");
             updateMemoryCount();
-            addMessage("ai", "Hafıza tamamen temizlendi.");
+            alert("Global hafıza sıfırlandı.");
         }
     }
 
     function updateMemoryCount() {
-        const count = getMemory().length;
-        document.getElementById("memory-count").innerText = `Hafıza: ${count} Bilgi`;
+        const count = getGlobalMemory().length;
+        document.getElementById("memory-count").innerText = `Global Hafıza: ${count} Bilgi`;
     }
 
-    // Görsel Seçimi
+    // Arayüz Çizimleri
+    function renderProjectsList() {
+        const projects = getProjects();
+        const activeProj = getActiveProject();
+        const listContainer = document.getElementById("projectList");
+        listContainer.innerHTML = "";
+
+        for (const projName in projects) {
+            const item = document.createElement("div");
+            item.className = `project-item ${projName === activeProj ? 'active' : ''}`;
+            item.innerHTML = `<span>📁 ${projName}</span>`;
+            item.onclick = () => setActiveProject(projName);
+            listContainer.appendChild(item);
+        }
+
+        document.getElementById("activeProjectTitle").innerText = `Proje: ${activeProj}`;
+    }
+
+    function loadChatHistory() {
+        const projects = getProjects();
+        const activeProj = getActiveProject();
+        const chatBox = document.getElementById("chatBox");
+        chatBox.innerHTML = "";
+
+        const history = projects[activeProj] || [];
+        if (history.length === 0) {
+            addMessageToDOM("ai", `"${activeProj}" projesine hoş geldiniz! Buradan kaldığınız yerden devam edebilir veya yeni talimatlar verebilirsiniz.`);
+        } else {
+            history.forEach(msg => {
+                addMessageToDOM(msg.sender, msg.text);
+            });
+        }
+    }
+
+    function createNewProject() {
+        const projName = prompt("Yeni proje adını giriniz (Örn: E-Ticaret Lansmanı):");
+        if (!projName) return;
+
+        const projects = getProjects();
+        if (projects[projName]) {
+            alert("Bu isimde bir proje zaten var!");
+            return;
+        }
+
+        projects[projName] = [];
+        saveProjects(projects);
+        setActiveProject(projName);
+    }
+
+    // Görsel İşlemleri
     function handleFileSelect(event) {
         const file = event.target.files[0];
         if (!file) return;
@@ -292,7 +460,7 @@
         }
     }
 
-    function addMessage(sender, text) {
+    function addMessageToDOM(sender, text) {
         const chatBox = document.getElementById("chatBox");
         const msgDiv = document.createElement("div");
         msgDiv.className = `message ${sender === 'user' ? 'user-message' : 'ai-message'}`;
@@ -301,6 +469,16 @@
         chatBox.scrollTop = chatBox.scrollHeight;
     }
 
+    function saveMessageToActiveProject(sender, text) {
+        const projects = getProjects();
+        const activeProj = getActiveProject();
+        if (!projects[activeProj]) projects[activeProj] = [];
+        
+        projects[activeProj].push({ sender, text });
+        saveProjects(projects);
+    }
+
+    // Mesaj Gönderme ve Yapay Zeka Entegrasyonu
     async function sendMessage() {
         const inputField = document.getElementById("userInput");
         const promptText = inputField.value.trim();
@@ -315,27 +493,32 @@
 
         let userMsg = promptText;
         if (selectedImageBase64 && !promptText) {
-            userMsg = "[Görsel yüklendi ve analiz edilerek hafızaya kaydediliyor...]";
+            userMsg = "[Görsel yüklendi ve projenin ortak hafızasına işleniyor...]";
         }
 
-        addMessage("user", userMsg);
+        // DOM ve Hafızaya Kaydet
+        addMessageToDOM("user", userMsg);
+        saveMessageToActiveProject("user", userMsg);
         inputField.value = "";
 
         const currentImage = selectedImageBase64;
         const currentImageType = selectedImageType;
-        cancelImage(); // Önizlemeyi sıfırla
+        cancelImage();
 
-        addMessage("ai", "Düşünüyor ve analiz ediyor...");
+        addMessageToDOM("ai", "Proje geçmişi ve global hafıza taranıyor...");
 
         try {
-            const memoryContext = JSON.stringify(getMemory());
-            let contents = [];
+            const activeProj = getActiveProject();
+            const projects = getProjects();
+            const currentProjectHistory = JSON.stringify(projects[activeProj]);
+            const globalMemoryContext = JSON.stringify(getGlobalMemory());
 
-            // Sistem Talimatı + Hafıza Bağlamı
-            let systemInstruction = `Sen ŞükrüÖzolgay - AI Projects asistanısın. 
-Kullanıcının kayıtlı hafızasındaki bilgiler şunlardır: ${memoryContext}. 
-Kullanıcının sorularına cevap verirken önce hafızadaki bilgileri kontrol et. 
-Eğer bir görsel yüklendiyse, görseldeki tüm metinleri, şemaları, grafikleri ve stratejileri detaylıca analiz et, özetle ve hafızaya kaydetmeye uygun şekilde açıkla.`;
+            let systemInstruction = `Sen ŞükrüÖzolgay - AI Projects sisteminin gelişmiş proje asistanısın. 
+Aktif Proje Adı: "${activeProj}"
+Bu Projenin Geçmiş Sohbetleri: ${currentProjectHistory}
+Tüm Projelerin Ortak (Global) Hafızası ve Yüklenen Strateji Görselleri: ${globalMemoryContext}
+
+Kullanıcı hangi sohbet ekranında olursa olsun, bu projenin tüm geçmiş aşamalarını, yüklenen dokümanları ve global hafızayı eksiksiz hatırlayarak kaldığı yerden stratejik ve kesintisiz yanıtlar üret.`;
 
             let userContentParts = [];
             
@@ -347,7 +530,7 @@ Eğer bir görsel yüklendiyse, görseldeki tüm metinleri, şemaları, grafikle
                     }
                 });
                 userContentParts.push({
-                    text: promptText ? promptText : "Bu görseldeki tüm stratejileri, şemaları ve metinleri detaylıca incele, kavra ve bana tam bir özet çıkar."
+                    text: promptText ? promptText : "Bu görseldeki stratejileri analiz et, projeye entegre et ve özetle."
                 });
             } else {
                 userContentParts.push({ text: promptText });
@@ -364,34 +547,38 @@ Eğer bir görsel yüklendiyse, görseldeki tüm metinleri, şemaları, grafikle
 
             const data = await response.json();
             
-            // AI Mesajını Güncelle
+            // "Yükleniyor..." mesajını kaldır
             const chatBox = document.getElementById("chatBox");
-            chatBox.removeChild(chatBox.lastChild); // "Düşünüyor..." mesajını kaldır
+            chatBox.removeChild(chatBox.lastChild);
 
             if (data.candidates && data.candidates[0].content.parts[0].text) {
                 const aiReply = data.candidates[0].content.parts[0].text;
-                addMessage("ai", aiReply);
+                addMessageToDOM("ai", aiReply);
+                saveMessageToActiveProject("ai", aiReply);
 
-                // Eğer görsel yüklendiyse bilgiyi otomatik hafızaya ekle
+                // Görsel yüklendiyse global hafızaya da işle
                 if (currentImage) {
-                    saveMemory({
+                    saveGlobalMemory({
+                        project: activeProj,
                         date: new Date().toLocaleDateString('tr-TR'),
                         summary: aiReply
                     });
                 }
             } else {
-                addMessage("ai", "Bir hata oluştu veya yanıt alınamadı. API Key'inizi kontrol edin.");
+                addMessageToDOM("ai", "Bir hata oluştu. API Key'inizi kontrol edin.");
             }
 
         } catch (error) {
             console.error(error);
             const chatBox = document.getElementById("chatBox");
             chatBox.removeChild(chatBox.lastChild);
-            addMessage("ai", "Bağlantı hatası oluştu. Lütfen konsolu ve API Key'inizi kontrol edin.");
+            addMessaageToDOM("ai", "Bağlantı hatası oluştu.");
         }
     }
 
-    // Sayfa açılışında hafıza sayısını güncelle
+    // İlk Yükleme
+    renderProjectsList();
+    loadChatHistory();
     updateMemoryCount();
 </script>
 
