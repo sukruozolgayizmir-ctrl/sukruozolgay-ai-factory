@@ -137,11 +137,12 @@
     </div>
 
     <script>
-        const SECURE_HASH = "8c35105267b2d56a350c3792c30084ab753c139c878f877fb0c9ffef604d55cc";
+        // Sso35-35sso şifresinin doğru SHA-256 hash karşılığı buraya sabitlenmiştir:
+        const SECURE_HASH = "b08c908581e14945d81b8ae7bb0338f32ac3b794f6e52230b050c99a4fb1c6b1";
 
         async function hashString(string) {
             const encoder = new TextEncoder();
-            const data = encoder.encode(string);
+            const data = encoder.encode(string.trim());
             const hashBuffer = await crypto.subtle.digest('SHA-256', data);
             const hashArray = Array.from(new Uint8Array(hashBuffer));
             return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
@@ -263,7 +264,7 @@
                 });
                 appendSafeMessage("ai", combinedText, searchResults);
             } else {
-                appendSafeMessage("ai", `Şükrü, "${text"}" araması için doğrudan eşleşen net bir internet verisi bulamadım. Farklı anahtar kelimelerle tekrar deneyebilirsin.`);
+                appendSafeMessage("ai", `Şükrü, "${text}" araması için doğrudan eşleşen net bir internet verisi bulamadım. Farklı anahtar kelimelerle tekrar deneyebilirsin.`);
             }
         }
 
