@@ -38,7 +38,6 @@
             overflow: hidden;
         }
 
-        /* Sol Proje Paneli */
         .sidebar {
             width: 260px;
             background-color: #121215;
@@ -110,7 +109,6 @@
             font-weight: 600;
         }
 
-        /* Sağ Chat Alanı */
         .chat-main {
             flex: 1;
             display: flex;
@@ -272,18 +270,14 @@
 <body>
 
 <div class="layout-container">
-    <!-- Sol Taraf: Projeler ve Sohbet Oturumları -->
     <div class="sidebar">
         <div class="sidebar-header">
             <h3>Projeler</h3>
             <button class="btn-new-project" onclick="createNewProject()">+ Yeni Proje</button>
         </div>
-        <div class="project-list" id="projectList">
-            <!-- Dinamik Projeler Buraya Gelecek -->
-        </div>
+        <div class="project-list" id="projectList"></div>
     </div>
 
-    <!-- Sağ Taraf: Aktif Proje Sohbet Ekranı -->
     <div class="chat-main">
         <div class="header">
             <h2 id="activeProjectTitle">ŞükrüÖzolgay - AI Projects</h2>
@@ -295,7 +289,7 @@
         </div>
 
         <div class="chat-box" id="chatBox">
-            <div class="message ai-message">Merhaba! Projelerinizi soldan seçebilir veya yeni bir proje açarak kaldığınız yerden devam edebilirsiniz. Yüklediğiniz görseller ve tüm aşamalar her zaman hatırlanır.</div>
+            <div class="message ai-message">Merhaba! Sistem güncellendi. Artık API Key ile ilgili bir sorun oluşursa detaylı hata mesajı doğrudan burada görünecektir.</div>
         </div>
 
         <div class="input-container">
@@ -308,7 +302,7 @@
                     📁 Görsel Yükle
                     <input type="file" id="file-input" accept="image/*" onchange="handleFileSelect(event)">
                 </label>
-                <input type="text" id="userInput" placeholder="Mesajınızı yazın veya projeyi kaldığı yerden yönlendirin..." onkeypress="handleKeyPress(event)">
+                <input type="text" id="userInput" placeholder="Mesajınızı yazın veya projeyi yönlendirin..." onkeypress="handleKeyPress(event)">
                 <button class="btn-send" onclick="sendMessage()">Gönder</button>
             </div>
         </div>
@@ -319,9 +313,8 @@
     let selectedImageBase64 = null;
     let selectedImageType = null;
 
-    // LocalStorage Tabanlı Veri Yönetimi
     function getApiKey() {
-        return localStorage.getItem("gemini_api_key") || "";
+        return (localStorage.getItem("gemini_api_key") || "").trim();
     }
 
     function setApiKey() {
@@ -333,13 +326,10 @@
         }
     }
 
-    // Projeler ve Mesaj Geçmişi Veri Yapısı
     function getProjects() {
         let projects = JSON.parse(localStorage.getItem("sukru_ai_projects"));
         if (!projects) {
-            projects = {
-                "Varsayılan Proje": []
-            };
+            projects = { "Varsayılan Proje": [] };
             localStorage.setItem("sukru_ai_projects", JSON.stringify(projects));
         }
         return projects;
@@ -383,7 +373,6 @@
         document.getElementById("memory-count").innerText = `Global Hafıza: ${count} Bilgi`;
     }
 
-    // Arayüz Çizimleri
     function renderProjectsList() {
         const projects = getProjects();
         const activeProj = getActiveProject();
@@ -409,16 +398,14 @@
 
         const history = projects[activeProj] || [];
         if (history.length === 0) {
-            addMessageToDOM("ai", `"${activeProj}" projesine hoş geldiniz! Buradan kaldığınız yerden devam edebilir veya yeni talimatlar verebilirsiniz.`);
+            addMessageToDOM("ai", `"${activeProj}" projesine hoş geldiniz! Sorularınızı sorabilirsiniz.`);
         } else {
-            history.forEach(msg => {
-                addMessageToDOM(msg.sender, msg.text);
-            });
+            history.forEach(msg => addMessageToDOM(msg.sender, msg.text));
         }
     }
 
     function createNewProject() {
-        const projName = prompt("Yeni proje adını giriniz (Örn: E-Ticaret Lansmanı):");
+        const projName = prompt("Yeni proje adını giriniz:");
         if (!projName) return;
 
         const projects = getProjects();
@@ -432,7 +419,6 @@
         setActiveProject(projName);
     }
 
-    // Görsel İşlemleri
     function handleFileSelect(event) {
         const file = event.target.files[0];
         if (!file) return;
@@ -455,9 +441,7 @@
     }
 
     function handleKeyPress(event) {
-        if (event.key === "Enter") {
-            sendMessage();
-        }
+        if (event.key === "Enter") sendMessage();
     }
 
     function addMessageToDOM(sender, text) {
@@ -478,7 +462,6 @@
         saveProjects(projects);
     }
 
-    // Mesaj Gönderme ve Yapay Zeka Entegrasyonu
     async function sendMessage() {
         const inputField = document.getElementById("userInput");
         const promptText = inputField.value.trim();
@@ -491,12 +474,7 @@
 
         if (!promptText && !selectedImageBase64) return;
 
-        let userMsg = promptText;
-        if (selectedImageBase64 && !promptText) {
-            userMsg = "[Görsel yüklendi ve projenin ortak hafızasına işleniyor...]";
-        }
-
-        // DOM ve Hafızaya Kaydet
+        let userMsg = promptText || "[Görsel yüklendi ve analiz ediliyor...]";
         addMessageToDOM("user", userMsg);
         saveMessageToActiveProject("user", userMsg);
         inputField.value = "";
@@ -505,78 +483,63 @@
         const currentImageType = selectedImageType;
         cancelImage();
 
-        addMessageToDOM("ai", "Proje geçmişi ve global hafıza taranıyor...");
+        addMessageToDOM("ai", "Düşünüyor ve yanıt hazırlanıyor...");
 
         try {
             const activeProj = getActiveProject();
             const projects = getProjects();
-            const currentProjectHistory = JSON.stringify(projects[activeProj]);
+            const currentProjectHistory = JSON.stringify(projects[activeProj] || []);
             const globalMemoryContext = JSON.stringify(getGlobalMemory());
 
-            let systemInstruction = `Sen ŞükrüÖzolgay - AI Projects sisteminin gelişmiş proje asistanısın. 
+            const systemPrompt = `Sen ŞükrüÖzolgay - AI Projects sisteminin gelişmiş proje asistanısın.
 Aktif Proje Adı: "${activeProj}"
-Bu Projenin Geçmiş Sohbetleri: ${currentProjectHistory}
-Tüm Projelerin Ortak (Global) Hafızası ve Yüklenen Strateji Görselleri: ${globalMemoryContext}
+Geçmiş Sohbetler: ${currentProjectHistory}
+Global Hafıza: ${globalMemoryContext}`;
 
-Kullanıcı hangi sohbet ekranında olursa olsun, bu projenin tüm geçmiş aşamalarını, yüklenen dokümanları ve global hafızayı eksiksiz hatırlayarak kaldığı yerden stratejik ve kesintisiz yanıtlar üret.`;
-
-            let userContentParts = [];
-            
+            let userParts = [];
             if (currentImage) {
-                userContentParts.push({
-                    inline_data: {
-                        mime_type: currentImageType,
-                        data: currentImage
-                    }
-                });
-                userContentParts.push({
-                    text: promptText ? promptText : "Bu görseldeki stratejileri analiz et, projeye entegre et ve özetle."
-                });
+                userParts.push({ inline_data: { mime_type: currentImageType, data: currentImage } });
+                userParts.push({ text: promptText || "Görseldeki tüm detayları ve stratejileri analiz et." });
             } else {
-                userContentParts.push({ text: promptText });
+                userParts.push({ text: promptText });
             }
 
             const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    system_instruction: { parts: [{ text: systemInstruction }] },
-                    contents: [{ parts: userContentParts }]
+                    systemInstruction: { parts: [{ text: systemPrompt }] },
+                    contents: [{ role: "user", parts: userParts }]
                 })
             });
 
             const data = await response.json();
             
-            // "Yükleniyor..." mesajını kaldır
             const chatBox = document.getElementById("chatBox");
-            chatBox.removeChild(chatBox.lastChild);
+            if (chatBox.lastChild) chatBox.removeChild(chatBox.lastChild);
 
-            if (data.candidates && data.candidates[0].content.parts[0].text) {
+            if (response.ok && data.candidates && data.candidates[0]?.content?.parts[0]?.text) {
                 const aiReply = data.candidates[0].content.parts[0].text;
                 addMessageToDOM("ai", aiReply);
                 saveMessageToActiveProject("ai", aiReply);
 
-                // Görsel yüklendiyse global hafızaya da işle
                 if (currentImage) {
-                    saveGlobalMemory({
-                        project: activeProj,
-                        date: new Date().toLocaleDateString('tr-TR'),
-                        summary: aiReply
-                    });
+                    saveGlobalMemory({ project: activeProj, date: new Date().toLocaleDateString('tr-TR'), summary: aiReply });
                 }
             } else {
-                addMessageToDOM("ai", "Bir hata oluştu. API Key'inizi kontrol edin.");
+                // Gerçek Google API Hata Mesajını Ekrana Yansıtma
+                const errMessage = data.error?.message || "Bilinmeyen API Hatası";
+                addMessageToDOM("ai", `⚠️ API Hatası (${response.status}): ${errMessage}`);
             }
 
         } catch (error) {
             console.error(error);
             const chatBox = document.getElementById("chatBox");
-            chatBox.removeChild(chatBox.lastChild);
-            addMessaageToDOM("ai", "Bağlantı hatası oluştu.");
+            if (chatBox.lastChild) chatBox.removeChild(chatBox.lastChild);
+            addMessageToDOM("ai", "⚠️ Ağ / Bağlantı Hatası: Lütfen internet bağlantınızı kontrol edin.");
         }
     }
 
-    // İlk Yükleme
     renderProjectsList();
     loadChatHistory();
     updateMemoryCount();
