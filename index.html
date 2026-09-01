@@ -97,7 +97,7 @@
             <div class="card">
                 <div>
                     <h3>Süper Beyin AI Asistan</h3>
-                    <p>Apisiz, tamamen dinamik çalışan ve anlık internet verilerini tarayan akıllı sorgu motoru.</p>
+                    <p>Apisiz, kelime ayrıştırma ve Wiki veritabanı tarama özellikleriyle donatılmış NLP destekli sorgu motoru.</p>
                 </div>
                 <button class="card-btn" onclick="openChat()">Sohbeti Başlat</button>
             </div>
@@ -115,7 +115,7 @@
                     <h3>Güvenlik Durumu</h3>
                     <p>SHA-256 kriptografik koruma, sessionStorage oturum güvenliği ve XSS filtresi aktif.</p>
                 </div>
-                <button class="card-btn" onclick="alert('Sistem tam güvenli ve dinamik moddadır.')">Durumu Gör</button>
+                <button class="card-btn" onclick="alert('Sistem tam güvenli ve NLP akıllı moddadır.')">Durumu Gör</button>
             </div>
         </div>
     </div>
@@ -127,7 +127,7 @@
                 <button class="close-chat" onclick="closeChat()">✕</button>
             </div>
             <div class="chat-messages" id="chat-messages">
-                <div class="message ai">Süper Beyin aktif. Sorduğun her soruyu anlık olarak internetten tarayıp senin için getireceğim.</div>
+                <div class="message ai">Süper Beyin aktif. Benimle normal bir dilde konuşabilir veya araştırma yapmamı isteyebilirsin.</div>
             </div>
             <div class="chat-input-area">
                 <input type="text" id="user-message" class="chat-input" placeholder="Ne araştırmamı istiyorsun?" onkeypress="handleChatKey(event)">
@@ -146,8 +146,6 @@
 
         async function checkPassword() {
             const inputVal = document.getElementById("password-input").value.trim();
-            
-            // Hem güvenli HTTPS ortamında SHA-256 kontrolü hem de yerel testler için güvenli doğrulama
             let isValid = false;
             try {
                 if (window.crypto && window.crypto.subtle) {
@@ -156,7 +154,6 @@
                     const hashBuffer = await crypto.subtle.digest('SHA-256', data);
                     const hashArray = Array.from(new Uint8Array(hashBuffer));
                     const inputHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-                    // Sso35-35sso hash değeri
                     if (inputHash === "b08c908581e14945d81b8ae7bb0338f32ac3b794f6e52230b050c99a4fb1c6b1") {
                         isValid = true;
                     }
@@ -165,7 +162,6 @@
                 console.warn("Kripto motoru yerel istisna:", e);
             }
 
-            // Doğrudan metin eşleşme fallback mekanizması (yerel testler ve tarayıcı kısıtlamaları için)
             if (inputVal === CORRECT_PASSWORD) {
                 isValid = true;
             }
@@ -227,28 +223,85 @@
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
 
+        // NLP Filtresi: Gereksiz kelimeleri ayıklar
+        function extractKeywords(sentence) {
+            const stopWords = ["bana", "onu", "araştır", "nedir", "kimdir", "hakkında", "bilgi", "ver", "bir", "ve", "ile", "için", "bu", "şu", "o", "mı", "mu", "nasıl"];
+            let words = sentence.toLowerCase().split(/\s+/);
+            let keywords = words.filter(w => !stopWords.includes(w) && w.length > 2);
+            return keywords.join(" ");
+        }
+
+        // Wikipedia Arama Motoru (Doğal dile daha uygun)
         async function searchWeb(query) {
             try {
-                const url = `https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json&no_html=1&skip_disambig=1`;
+                const url = `https://tr.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&utf8=&format=json&origin=*`;
                 const response = await fetch(url);
                 const data = await response.json();
                 
                 let results = [];
-                if (data.RelatedTopics && data.RelatedTopics.length > 0) {
-                    data.RelatedTopics.slice(0, 4).forEach(item => {
-                        if (item.Text && item.FirstURL) {
-                            results.push({
-                                title: item.Text.split(' - ')[0] || "Güncel Kaynak",
-                                content: item.Text,
-                                url: item.FirstURL
-                            });
-                        }
+                if (data.query && data.query.search && data.query.search.length > 0) {
+                    data.query.search.slice(0, 3).forEach(item => {
+                        const cleanContent = item.snippet.replace(/<\/?[^>]+(>|$)/g, ""); // HTML etiketlerini temizle
+                        results.push({
+                            title: item.title,
+                            content: cleanContent + "...",
+                            url: `https://tr.wikipedia.org/wiki/${encodeURIComponent(item.title)}`
+                        });
                     });
                 }
                 return results;
             } catch (err) {
                 console.error("Arama motoru hatası:", err);
                 return [];
+            }
+        }
+
+        // Akıllı Yönlendirme (Intent Router)
+        async function processUserQuery(text) {
+            const lowerText = text.toLowerCase();
+
+            // 1. Temel Selamlaşma ve Kimlik
+            if (lowerText === "selam" || lowerText.includes("kimsin") || lowerText === "merhaba") {
+                return {
+                    text: "Merhaba Şükrü! Ben senin kişisel AI Factory Süper Beyin asistanınım. Açık kaynak veritabanlarıyla donatıldım. Sana nasıl yardımcı olabilirim?",
+                    sources: []
+                };
+            }
+
+            // 2. Tarih ve Saat Algılama
+            if (lowerText.includes("bugün") && (lowerText.includes("tarih") || lowerText.includes("önemli"))) {
+                const today = new Date();
+                const dateStr = today.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
+                const dayMonth = today.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long' });
+                
+                // Tarihte bugün araştırması
+                const searchResults = await searchWeb(dayMonth + " olaylar");
+                let responseText = `Bugünün tarihi: ${dateStr}.\n\nİnternet veritabanına göre tarihte bugün (${dayMonth}) ile bağlantılı bulgular:\n`;
+                
+                if (searchResults.length > 0) {
+                    searchResults.forEach(res => { responseText += `\n• ${res.title}: ${res.content}`; });
+                } else {
+                    responseText += "\nTarihte bugün için spesifik bir wiki kaydı bulunamadı.";
+                }
+
+                return { text: responseText, sources: searchResults };
+            }
+
+            // 3. Genel Arama (NLP Filtresi ile)
+            const cleanQuery = extractKeywords(text);
+            const searchResults = await searchWeb(cleanQuery || text);
+
+            if (searchResults.length > 0) {
+                let combinedText = `Şükrü, "${text}" konusu ile ilgili ansiklopedik bulgular:\n\n`;
+                searchResults.forEach((res) => {
+                    combinedText += `• ${res.title}: ${res.content}\n\n`;
+                });
+                return { text: combinedText, sources: searchResults };
+            } else {
+                return { 
+                    text: `Şükrü, "${text}" araması için doğrudan eşleşen net bir veri bulamadım. Kavramı biraz daha daraltıp sorabilir misin?`, 
+                    sources: [] 
+                };
             }
         }
 
@@ -263,22 +316,14 @@
             const messagesContainer = document.getElementById("chat-messages");
             const loadingDiv = document.createElement("div");
             loadingDiv.className = "message ai";
-            loadingDiv.textContent = "🔍 Süper Beyin interneti tarıyor...";
+            loadingDiv.textContent = "🔍 Süper Beyin analiz ediyor...";
             messagesContainer.appendChild(loadingDiv);
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
-            const searchResults = await searchWeb(text);
+            const response = await processUserQuery(text);
+            
             messagesContainer.removeChild(loadingDiv);
-
-            if (searchResults.length > 0) {
-                let combinedText = `Şükrü, sorduğun "${text}" konusu ile ilgili ulaştığım güncel bilgiler:\n\n`;
-                searchResults.forEach((res) => {
-                    combinedText += `• ${res.content}\n\n`;
-                });
-                appendSafeMessage("ai", combinedText, searchResults);
-            } else {
-                appendSafeMessage("ai", `Şükrü, "${text}" araması için doğrudan eşleşen net bir internet verisi bulamadım. Farklı anahtar kelimelerle tekrar deneyebilirsin.`);
-            }
+            appendSafeMessage("ai", response.text, response.sources);
         }
 
         function handleChatKey(event) {
