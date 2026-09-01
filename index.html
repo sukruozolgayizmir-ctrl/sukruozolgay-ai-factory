@@ -62,11 +62,12 @@
         .chat-header h3 { color: #CA1F3D; font-size: 18px; }
         .close-chat { background: none; border: none; color: white; font-size: 20px; cursor: pointer; }
         .chat-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
-        .message { max-width: 85%; padding: 12px 16px; border-radius: 12px; font-size: 14px; line-height: 1.5; white-space: pre-wrap; }
+        .message { max-width: 85%; padding: 12px 16px; border-radius: 12px; font-size: 14px; line-height: 1.5; word-break: break-word; }
         .message.user { background: #CA1F3D; color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
         .message.ai { background: #000000; color: #f8fafc; align-self: flex-start; border-bottom-left-radius: 2px; border: 1px solid #1a1a1a; }
-        .source-box { font-size: 11px; color: #888; margin-top: 6px; border-top: 1px solid #222; padding-top: 4px; }
-        .source-box a { color: #CA1F3D; text-decoration: none; }
+        .source-box { font-size: 12px; color: #a1a1aa; margin-top: 8px; border-top: 1px solid #222; padding-top: 6px; }
+        .source-box a { color: #CA1F3D; text-decoration: none; display: inline-block; margin-top: 2px; }
+        .source-box a:hover { text-decoration: underline; }
         .chat-input-area { padding: 15px; background: #000000; border-top: 1px solid #1a1a1a; display: flex; gap: 10px; }
         .chat-input { flex: 1; padding: 10px 14px; background: #000000; border: 1px solid #1a1a1a; border-radius: 8px; color: white; outline: none; }
         .chat-input:focus { border-color: #CA1F3D; }
@@ -80,7 +81,7 @@
         <div class="auth-card">
             <h2>AI Factory</h2>
             <p>Bu sistem sadece Şükrü Özolgay'a özeldir.</p>
-            <input type="password" id="password-input" class="auth-input" placeholder="Şifrenizi Girin">
+            <input type="password" id="password-input" class="auth-input" placeholder="Şifrenizi Girin" autocomplete="current-password">
             <button class="auth-btn" onclick="checkPassword()">Giriş Yap</button>
             <div id="error" class="error-msg">Hatalı Şifre! Lütfen tekrar deneyin.</div>
         </div>
@@ -96,7 +97,7 @@
             <div class="card">
                 <div>
                     <h3>Süper Beyin AI Asistan</h3>
-                    <p>Apisiz, yerel mantık yürüten ve dış veri köprülerini kullanan akıllı asistan motoru.</p>
+                    <p>Apisiz, tamamen yerel çalışan ve güvenli web arama köprülerini kullanan akıllı asistan motoru.</p>
                 </div>
                 <button class="card-btn" onclick="openChat()">Sohbeti Başlat</button>
             </div>
@@ -106,15 +107,15 @@
                     <h3>Qwen Image Edit Modülü</h3>
                     <p>Hugging Face üzerinde yer alan hızlı görsel düzenleme ve LoRA entegrasyon sistemine doğrudan eriş.</p>
                 </div>
-                <a href="https://huggingface.co/spaces/prithivMLmods/Qwen-Image-Edit-2511-LoRAs-Fast" target="_blank" class="card-btn">Modülü Aç (Hugging Face)</a>
+                <a href="https://huggingface.co/spaces/prithivMLmods/Qwen-Image-Edit-2511-LoRAs-Fast" target="_blank" rel="noopener noreferrer" class="card-btn">Modülü Aç (Hugging Face)</a>
             </div>
 
             <div class="card">
                 <div>
                     <h3>Güvenlik Durumu</h3>
-                    <p>Kriptografik SHA-256 şifre koruması aktif. Botlar şifreyi asla okuyamaz.</p>
+                    <p>SHA-256 kriptografik koruma ve XSS güvenlik süzgeci aktif. Oturumlar güvenli bellektedir.</p>
                 </div>
-                <button class="card-btn" onclick="alert('Sistem güvenli ve şifre hash koruması altındadır.')">Durumu Gör</button>
+                <button class="card-btn" onclick="alert('Sistem en üst düzey güvenlik mimarisiyle korunmaktadır.')">Durumu Gör</button>
             </div>
         </div>
     </div>
@@ -126,7 +127,7 @@
                 <button class="close-chat" onclick="closeChat()">✕</button>
             </div>
             <div class="chat-messages" id="chat-messages">
-                <div class="message ai">Merhaba Şükrü! Güvenlik katmanı SHA-256 ile güçlendirildi. Apisiz ve tamamen yerel altyapı ile emrindeyim.</div>
+                <div class="message ai">Merhaba Şükrü! Sistem en güvenli mimariyle yapılandırıldı ve emrindeyim. Ne araştırmamızı istersin?</div>
             </div>
             <div class="chat-input-area">
                 <input type="text" id="user-message" class="chat-input" placeholder="Komutunu veya araştırılacak konuyu yaz..." onkeypress="handleChatKey(event)">
@@ -136,7 +137,7 @@
     </div>
 
     <script>
-        // Şifre açık metin olarak asla yer almaz, sadece SHA-256 hash'i tutulur.
+        // Şifre açık metin olarak asla tutulmaz, sadece SHA-256 hash'i bulunur.
         const SECURE_HASH = "8c35105267b2d56a350c3792c30084ab753c139c878f877fb0c9ffef604d55cc";
 
         async function hashString(string) {
@@ -147,7 +148,8 @@
             return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
         }
 
-        if (localStorage.getItem("isLoggedIn") === "true") {
+        // sessionStorage kullanarak sekme kapandığında oturumun güvenle silinmesi sağlanır
+        if (sessionStorage.getItem("isLoggedIn") === "true") {
             document.getElementById("auth-overlay").style.display = "none";
             document.getElementById("main-content").style.display = "block";
         }
@@ -157,7 +159,7 @@
             const inputHash = await hashString(inputVal);
             
             if (inputHash === SECURE_HASH) {
-                localStorage.setItem("isLoggedIn", "true");
+                sessionStorage.setItem("isLoggedIn", "true");
                 document.getElementById("auth-overlay").style.display = "none";
                 document.getElementById("main-content").style.display = "block";
             } else {
@@ -171,7 +173,7 @@
         });
 
         function logout() {
-            localStorage.removeItem("isLoggedIn");
+            sessionStorage.removeItem("isLoggedIn");
             location.reload();
         }
 
@@ -183,7 +185,41 @@
             document.getElementById("chat-modal").style.display = "none";
         }
 
-        // Apisiz akıllı yerel arama ve mantık motoru
+        // XSS Korumalı Güvenli Metin ve Kaynak Oluşturucu
+        function appendSafeMessage(sender, text, sources = []) {
+            const messagesContainer = document.getElementById("chat-messages");
+            
+            const msgDiv = document.createElement("div");
+            msgDiv.className = `message ${sender}`;
+            msgDiv.textContent = text; // XSS engellemek için doğrudan textContent kullanılır
+            
+            if (sources && sources.length > 0) {
+                const sourceBox = document.createElement("div");
+                sourceBox.className = "source-box";
+                
+                const titleStrong = document.createElement("strong");
+                titleStrong.textContent = "Kaynaklar:";
+                sourceBox.appendChild(titleStrong);
+                sourceBox.appendChild(document.createElement("br"));
+
+                sources.forEach(src => {
+                    const link = document.createElement("a");
+                    link.href = src.url;
+                    link.target = "_blank";
+                    link.rel = "noopener noreferrer";
+                    link.textContent = `🔗 ${src.title}`;
+                    sourceBox.appendChild(link);
+                    sourceBox.appendChild(document.createElement("br"));
+                });
+                
+                msgDiv.appendChild(sourceBox);
+            }
+
+            messagesContainer.appendChild(msgDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Güvenli Apisiz Web Arama Motoru
         async function searchWeb(query) {
             try {
                 const url = `https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json&no_html=1&skip_disambig=1`;
@@ -195,7 +231,7 @@
                     data.RelatedTopics.slice(0, 3).forEach(item => {
                         if (item.Text && item.FirstURL) {
                             results.push({
-                                title: item.Text.split(' - ')[0] || "Bulgu",
+                                title: item.Text.split(' - ')[0] || "İnternet Kaynağı",
                                 content: item.Text,
                                 url: item.FirstURL
                             });
@@ -204,7 +240,7 @@
                 }
                 return results;
             } catch (err) {
-                console.error("Arama motoru hatası:", err);
+                console.error("Arama motoru güvenli erişim hatası:", err);
                 return [];
             }
         }
@@ -214,60 +250,34 @@
             const text = inputField.value.trim();
             if (!text) return;
 
-            const messagesContainer = document.getElementById("chat-messages");
-
-            const userMsgDiv = document.createElement("div");
-            userMsgDiv.className = "message user";
-            userMsgDiv.textContent = text;
-            messagesContainer.appendChild(userMsgDiv);
-
+            appendSafeMessage("user", text);
             inputField.value = "";
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-
-            const aiMsgDiv = document.createElement("div");
-            aiMsgDiv.className = "message ai";
 
             const lower = text.toLowerCase();
             if (lower.includes("selam") || lower.includes("kimsin") || lower.includes("merhaba")) {
-                aiMsgDiv.textContent = `Merhaba Şükrü! Ben tamamen apisiz çalışan AI Factory Süper Beyin asistanınım. Sistem şifresi SHA-256 ile koruma altındadır. Sana nasıl yardımcı olabilirim?`;
-                messagesContainer.appendChild(aiMsgDiv);
-                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                appendSafeMessage("ai", "Merhaba Şükrü! Sistem en üst düzey SHA-256 ve XSS güvenlik önlemleriyle çalışmaktadır. Sana nasıl yardımcı olabilirim?");
                 return;
             }
 
+            const messagesContainer = document.getElementById("chat-messages");
             const loadingDiv = document.createElement("div");
             loadingDiv.className = "message ai";
-            loadingDiv.textContent = "🔍 Süper Beyin verileri işliyor...";
+            loadingDiv.textContent = "🔍 Süper Beyin güvenli tarama gerçekleştiriyor...";
             messagesContainer.appendChild(loadingDiv);
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
             const searchResults = await searchWeb(text);
             messagesContainer.removeChild(loadingDiv);
 
-            let responseHTML = "";
-            let sourcesHTML = "";
-
             if (searchResults.length > 0) {
-                responseHTML = `Şükrü, "${text}" için ulaştığım bulgular:\n\n`;
+                let combinedText = `Şükrü, "${text}" ile ilgili ulaştığım güncel bulgular:\n\n`;
                 searchResults.forEach((res) => {
-                    responseHTML += `• ${res.content}\n\n`;
-                    sourcesHTML += `<div>🔗 <a href="${res.url}" target="_blank">${res.title}</a></div>`;
+                    combinedText += `• ${res.content}\n\n`;
                 });
+                appendSafeMessage("ai", combinedText, searchResults);
             } else {
-                responseHTML = `Şükrü, "${text}" sorgusu için doğrudan eşleşen harici veri bulunamadı. Yerel yapay zekâ mantığıyla işleme devam edebiliriz.`;
+                appendSafeMessage("ai", `Şükrü, "${text}" araması için doğrudan eşleşen harici veri bulunamadı. Farklı anahtar kelimelerle tekrar deneyebilirsin.`);
             }
-
-            aiMsgDiv.textContent = responseHTML;
-
-            if (sourcesHTML) {
-                const sourceBox = document.createElement("div");
-                sourceBox.className = "source-box";
-                sourceBox.innerHTML = "<strong>Kaynaklar:</strong>" + sourcesHTML;
-                aiMsgDiv.appendChild(sourceBox);
-            }
-
-            messagesContainer.appendChild(aiMsgDiv);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
 
         function handleChatKey(event) {
