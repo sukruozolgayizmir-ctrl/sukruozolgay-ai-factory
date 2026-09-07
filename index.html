@@ -1,96 +1,256 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="tr" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kişisel AI Asistanı</title>
+  <title>Kişisel AI Studio</title>
   <style>
+    :root {
+      --primary-color: #2563eb;
+      --primary-hover: #1d4ed8;
+      --bg-main: #f8fafc;
+      --bg-card: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border-color: #e2e8f0;
+      --msg-user: #dbeafe;
+      --msg-ai: #f1f5f9;
+      --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+    }
+
+    [data-theme="dark"] {
+      --bg-main: #0f172a;
+      --bg-card: #1e293b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border-color: #334155;
+      --msg-user: #1e3a8a;
+      --msg-ai: #334155;
+      --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+    }
+
+    * { box-sizing: border-box; transition: background-color 0.2s, color 0.2s, border-color 0.2s; }
+
     body {
-      font-family: Arial, sans-serif;
-      max-width: 800px;
-      margin: 30px auto;
-      padding: 0 15px;
-      background-color: #f4f6f8;
-    }
-    h2 {
-      color: #333;
-      text-align: center;
-    }
-    .controls {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      margin: 0;
+      padding: 20px;
       display: flex;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    .app-container {
+      width: 100%;
+      max-width: 900px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      height: 90vh;
+      overflow: hidden;
+    }
+
+    header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .brand {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--primary-color);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
       gap: 10px;
-      margin-bottom: 10px;
+      flex-wrap: wrap;
     }
-    select {
-      padding: 8px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      background: #fff;
-    }
-    #chat-box {
-      border: 1px solid #ddd;
-      height: 450px;
-      overflow-y: auto;
-      padding: 15px;
-      background: #ffffff;
+
+    select, button, input[type="color"] {
+      padding: 8px 12px;
       border-radius: 8px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-      margin-bottom: 15px;
-    }
-    .input-container {
-      display: flex;
-      gap: 10px;
-    }
-    #user-input {
-      flex: 1;
-      padding: 12px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      font-size: 15px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-card);
+      color: var(--text-main);
+      font-size: 0.875rem;
+      cursor: pointer;
       outline: none;
     }
-    #send-button {
-      padding: 12px 24px;
-      background-color: #007bff;
+
+    select:focus { border-color: var(--primary-color); }
+
+    .theme-btn {
+      padding: 8px 12px;
+      font-weight: 600;
+    }
+
+    .color-picker-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    input[type="color"] {
+      width: 32px;
+      height: 32px;
+      padding: 2px;
+      border: 1px solid var(--border-color);
+    }
+
+    #chat-box {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .message {
+      max-width: 80%;
+      padding: 12px 16px;
+      border-radius: 12px;
+      line-height: 1.5;
+      font-size: 0.95rem;
+      word-wrap: break-word;
+    }
+
+    .message.user {
+      align-self: flex-end;
+      background-color: var(--msg-user);
+      border-bottom-right-radius: 2px;
+    }
+
+    .message.ai {
+      align-self: flex-start;
+      background-color: var(--msg-ai);
+      border-bottom-left-radius: 2px;
+    }
+
+    .message-meta {
+      font-size: 0.75rem;
+      font-weight: bold;
+      margin-bottom: 4px;
+      color: var(--text-muted);
+    }
+
+    .input-area {
+      padding: 16px 20px;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      gap: 10px;
+    }
+
+    #user-input {
+      flex: 1;
+      padding: 12px 16px;
+      border-radius: 10px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-main);
+      color: var(--text-main);
+      font-size: 0.95rem;
+    }
+
+    #send-btn {
+      background-color: var(--primary-color);
       color: white;
       border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 15px;
-      font-weight: bold;
+      font-weight: 600;
+      padding: 0 20px;
     }
-    #send-button:hover {
-      background-color: #0056b3;
+
+    #send-btn:hover {
+      background-color: var(--primary-hover);
     }
   </style>
 </head>
 <body>
 
-  <h2>Kişisel AI Asistanı</h2>
-  
-  <div class="controls">
-    <label for="provider-select"><strong>Model Seçimi:</strong></label>
-    <select id="provider-select">
-      <option value="qwen-online">Qwen 72B (OpenRouter + Canlı Web Arama)</option>
-      <option value="qwen-standard">Qwen 72B (OpenRouter - Standart)</option>
-      <option value="groq-llama">Groq (Llama 3 - Işık Hızında)</option>
-    </select>
-  </div>
+  <div class="app-container">
+    <header>
+      <div class="brand">⚡ AI Studio</div>
+      
+      <div class="toolbar">
+        <select id="model-select">
+          <optgroup label="Qwen (OpenRouter)">
+            <option value="qwen-flash">Qwen Flash (Hızlı / 7B)</option>
+            <option value="qwen-pro">Qwen Pro (Gelişmiş / 72B)</option>
+            <option value="qwen-online">Qwen Pro Web (Canlı İnternet Aramalı)</option>
+          </optgroup>
+          <optgroup label="Groq (Ultra Hızlı)">
+            <option value="groq-flash">Groq Flash (Llama 8B Instant)</option>
+            <option value="groq-pro">Groq Pro (Llama 70B Versatile)</option>
+            <option value="groq-extended">Groq Extended (DeepSeek R1 Distill)</option>
+          </optgroup>
+        </select>
 
-  <div id="chat-box"></div>
-  
-  <div class="input-container">
-    <input type="text" id="user-input" placeholder="Mesajınızı yazın..." />
-    <button id="send-button">Gönder</button>
+        <div class="color-picker-wrapper">
+          <span>Renk:</span>
+          <input type="color" id="primary-color-picker" value="#2563eb">
+        </div>
+
+        <button class="theme-btn" id="theme-toggle">🌙 Gece</button>
+      </div>
+    </header>
+
+    <div id="chat-box"></div>
+
+    <div class="input-area">
+      <input type="text" id="user-input" placeholder="Bir şeyler yazın..." />
+      <button id="send-btn">Gönder</button>
+    </div>
   </div>
 
   <script>
     document.addEventListener("DOMContentLoaded", () => {
-      const sendButton = document.getElementById("send-button");
-      const userInput = document.getElementById("user-input");
       const chatBox = document.getElementById("chat-box");
-      const providerSelect = document.getElementById("provider-select");
+      const userInput = document.getElementById("user-input");
+      const sendBtn = document.getElementById("send-btn");
+      const modelSelect = document.getElementById("model-select");
+      const themeToggle = document.getElementById("theme-toggle");
+      const colorPicker = document.getElementById("primary-color-picker");
 
+      // --- Tema ve Renk Yönetimi ---
+      const savedTheme = localStorage.getItem("APP_THEME") || "light";
+      document.documentElement.setAttribute("data-theme", savedTheme);
+      themeToggle.textContent = savedTheme === "dark" ? "☀️ Gündüz" : "🌙 Gece";
+
+      themeToggle.addEventListener("click", () => {
+        const currentTheme = document.documentElement.getAttribute("data-theme");
+        const newTheme = currentTheme === "dark" ? "light" : "dark";
+        document.documentElement.setAttribute("data-theme", newTheme);
+        localStorage.setItem("APP_THEME", newTheme);
+        themeToggle.textContent = newTheme === "dark" ? "☀️ Gündüz" : "🌙 Gece";
+      });
+
+      const savedColor = localStorage.getItem("APP_COLOR") || "#2563eb";
+      document.documentElement.style.setProperty("--primary-color", savedColor);
+      colorPicker.value = savedColor;
+
+      colorPicker.addEventListener("input", (e) => {
+        const color = e.target.value;
+        document.documentElement.style.setProperty("--primary-color", color);
+        localStorage.setItem("APP_COLOR", color);
+      });
+
+      // --- Key Yönetimi ---
       function getApiKey(keyName, promptText) {
         let key = localStorage.getItem(keyName);
         if (!key) {
@@ -98,39 +258,47 @@
           if (key && key.trim() !== "") {
             localStorage.setItem(keyName, key.trim());
           } else {
-            alert("API anahtarı girilmedi.");
+            alert("API anahtarı olmadan işlem yapılamaz.");
             return null;
           }
         }
         return key;
       }
 
+      // --- Mesaj Gönderme ---
       async function handleSendMessage() {
         const promptText = userInput.value.trim();
         if (!promptText) return;
 
-        const selectedMode = providerSelect.value;
+        const selectedMode = modelSelect.value;
         let apiUrl = "";
         let apiKey = "";
         let modelName = "";
 
+        // Model Seçim Mantığı
         if (selectedMode.startsWith("qwen")) {
-          apiKey = getApiKey("MY_OPENROUTER_KEY", "Lütfen OpenRouter API Anahtarınızı girin:");
+          apiKey = getApiKey("MY_OPENROUTER_KEY", "OpenRouter API Anahtarınızı girin:");
           apiUrl = "https://openrouter.ai/api/v1/chat/completions";
-          // Web araması aktif mod için :online eki kullanılır
-          modelName = selectedMode === "qwen-online" ? "qwen/qwen-2.5-72b-instruct:online" : "qwen/qwen-2.5-72b-instruct";
-        } else if (selectedMode === "groq-llama") {
-          apiKey = getApiKey("MY_GROQ_KEY", "Lütfen Groq API Anahtarınızı girin (console.groq.com):");
+          
+          if (selectedMode === "qwen-flash") modelName = "qwen/qwen-2.5-7b-instruct";
+          else if (selectedMode === "qwen-pro") modelName = "qwen/qwen-2.5-72b-instruct";
+          else if (selectedMode === "qwen-online") modelName = "qwen/qwen-2.5-72b-instruct:online";
+
+        } else if (selectedMode.startsWith("groq")) {
+          apiKey = getApiKey("MY_GROQ_KEY", "Groq API Anahtarınızı girin (console.groq.com):");
           apiUrl = "https://api.groq.com/openai/v1/chat/completions";
-          modelName = "llama-3.3-70b-versatile";
+
+          if (selectedMode === "groq-flash") modelName = "llama-3.1-8b-instant";
+          else if (selectedMode === "groq-pro") modelName = "llama-3.3-70b-versatile";
+          else if (selectedMode === "groq-extended") modelName = "deepseek-r1-distill-llama-70b";
         }
 
         if (!apiKey) return;
 
-        appendMessage("Sen", promptText);
+        appendMessage("Sen", promptText, "user");
         userInput.value = "";
         
-        const loadingId = appendMessage("AI", "Düşünüyor...", true);
+        const loadingId = appendMessage("Yapay Zeka", "Düşünüyor...", "ai");
 
         try {
           const response = await fetch(apiUrl, {
@@ -149,7 +317,7 @@
             if (response.status === 401) {
               const keyToRemove = selectedMode.startsWith("qwen") ? "MY_OPENROUTER_KEY" : "MY_GROQ_KEY";
               localStorage.removeItem(keyToRemove);
-              throw new Error("API Anahtarı geçersiz. Sıfırlandı, tekrar deneyin.");
+              throw new Error("Geçersiz API Anahtarı. Anahtar silindi, tekrar deneyin.");
             }
             throw new Error(`Sunucu Hatası: ${response.status}`);
           }
@@ -157,43 +325,41 @@
           const data = await response.json();
           removeMessage(loadingId);
           
-          const botName = selectedMode.includes("groq") ? "Groq AI" : "Qwen AI";
-          appendMessage(botName, data.choices[0].message.content);
+          const label = modelSelect.options[modelSelect.selectedIndex].text;
+          appendMessage(label, data.choices[0].message.content, "ai");
 
         } catch (error) {
           console.error(error);
           removeMessage(loadingId);
-          appendMessage("Sistem Hata", error.message || "Bağlantı kurulamadı.");
+          appendMessage("Sistem", error.message || "Bağlantı hatası yaşandı.", "ai");
         }
       }
 
-      function appendMessage(sender, text, isLoading = false) {
-        if (!chatBox) return;
-        const messageDiv = document.createElement("div");
-        const messageId = "msg-" + Date.now();
-        messageDiv.id = messageId;
-        messageDiv.style.margin = "10px 0";
-        messageDiv.style.padding = "10px 14px";
-        messageDiv.style.borderRadius = "6px";
-        messageDiv.style.backgroundColor = sender === "Sen" ? "#e3f2fd" : "#f1f3f4";
+      function appendMessage(sender, text, type) {
+        const msgDiv = document.createElement("div");
+        const msgId = "msg-" + Date.now();
+        msgDiv.id = msgId;
+        msgDiv.classList.add("message", type);
         
-        messageDiv.innerHTML = `<strong>${sender}:</strong> ${text}`;
-        chatBox.appendChild(messageDiv);
+        msgDiv.innerHTML = `
+          <div class="message-meta">${sender}</div>
+          <div>${text.replace(/\n/g, '<br>')}</div>
+        `;
+        
+        chatBox.appendChild(msgDiv);
         chatBox.scrollTop = chatBox.scrollHeight;
-        return messageId;
+        return msgId;
       }
 
       function removeMessage(id) {
-        const element = document.getElementById(id);
-        if (element) element.remove();
+        const el = document.getElementById(id);
+        if (el) el.remove();
       }
 
-      if (sendButton && userInput) {
-        sendButton.addEventListener("click", handleSendMessage);
-        userInput.addEventListener("keypress", (e) => {
-          if (e.key === "Enter") handleSendMessage();
-        });
-      }
+      sendBtn.addEventListener("click", handleSendMessage);
+      userInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") handleSendMessage();
+      });
     });
   </script>
 </body>
