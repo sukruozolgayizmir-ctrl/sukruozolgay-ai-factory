@@ -16,6 +16,17 @@
       color: #333;
       text-align: center;
     }
+    .controls {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    select {
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      background: #fff;
+    }
     #chat-box {
       border: 1px solid #ddd;
       height: 450px;
@@ -55,8 +66,19 @@
 </head>
 <body>
 
-  <h2>Kişisel Qwen AI Asistanı</h2>
+  <h2>Kişisel AI Asistanı</h2>
+  
+  <div class="controls">
+    <label for="provider-select"><strong>Model Seçimi:</strong></label>
+    <select id="provider-select">
+      <option value="qwen-online">Qwen 72B (OpenRouter + Canlı Web Arama)</option>
+      <option value="qwen-standard">Qwen 72B (OpenRouter - Standart)</option>
+      <option value="groq-llama">Groq (Llama 3 - Işık Hızında)</option>
+    </select>
+  </div>
+
   <div id="chat-box"></div>
+  
   <div class="input-container">
     <input type="text" id="user-input" placeholder="Mesajınızı yazın..." />
     <button id="send-button">Gönder</button>
@@ -67,16 +89,16 @@
       const sendButton = document.getElementById("send-button");
       const userInput = document.getElementById("user-input");
       const chatBox = document.getElementById("chat-box");
-      const API_URL = "https://openrouter.ai/api/v1/chat/completions";
+      const providerSelect = document.getElementById("provider-select");
 
-      function getPersonalApiKey() {
-        let key = localStorage.getItem("MY_OPENROUTER_KEY");
+      function getApiKey(keyName, promptText) {
+        let key = localStorage.getItem(keyName);
         if (!key) {
-          key = prompt("Sisteme sadece sen erişabilirsin. Lütfen OpenRouter API Anahtarını girin:");
+          key = prompt(promptText);
           if (key && key.trim() !== "") {
-            localStorage.setItem("MY_OPENROUTER_KEY", key.trim());
+            localStorage.setItem(keyName, key.trim());
           } else {
-            alert("API anahtarı girilmediği için sistem çalışmayacaktır.");
+            alert("API anahtarı girilmedi.");
             return null;
           }
         }
@@ -87,40 +109,56 @@
         const promptText = userInput.value.trim();
         if (!promptText) return;
 
-        const apiKey = getPersonalApiKey();
+        const selectedMode = providerSelect.value;
+        let apiUrl = "";
+        let apiKey = "";
+        let modelName = "";
+
+        if (selectedMode.startsWith("qwen")) {
+          apiKey = getApiKey("MY_OPENROUTER_KEY", "Lütfen OpenRouter API Anahtarınızı girin:");
+          apiUrl = "https://openrouter.ai/api/v1/chat/completions";
+          // Web araması aktif mod için :online eki kullanılır
+          modelName = selectedMode === "qwen-online" ? "qwen/qwen-2.5-72b-instruct:online" : "qwen/qwen-2.5-72b-instruct";
+        } else if (selectedMode === "groq-llama") {
+          apiKey = getApiKey("MY_GROQ_KEY", "Lütfen Groq API Anahtarınızı girin (console.groq.com):");
+          apiUrl = "https://api.groq.com/openai/v1/chat/completions";
+          modelName = "llama-3.3-70b-versatile";
+        }
+
         if (!apiKey) return;
 
         appendMessage("Sen", promptText);
         userInput.value = "";
         
-        const loadingId = appendMessage("Qwen AI", "Düşünüyor...", true);
+        const loadingId = appendMessage("AI", "Düşünüyor...", true);
 
         try {
-          const response = await fetch(API_URL, {
+          const response = await fetch(apiUrl, {
             method: "POST",
             headers: {
               "Authorization": `Bearer ${apiKey}`,
-              "Content-Type": "application/json",
-              "HTTP-Referer": window.location.origin,
-              "X-Title": "Personal AI Assistant"
+              "Content-Type": "application/json"
             },
             body: JSON.stringify({
-              model: "qwen/qwen-2.5-72b-instruct",
+              model: modelName,
               messages: [{ role: "user", content: promptText }]
             })
           });
 
           if (!response.ok) {
             if (response.status === 401) {
-              localStorage.removeItem("MY_OPENROUTER_KEY");
-              throw new Error("API Anahtarı geçersiz. Sayfayı yenileyip tekrar girin.");
+              const keyToRemove = selectedMode.startsWith("qwen") ? "MY_OPENROUTER_KEY" : "MY_GROQ_KEY";
+              localStorage.removeItem(keyToRemove);
+              throw new Error("API Anahtarı geçersiz. Sıfırlandı, tekrar deneyin.");
             }
             throw new Error(`Sunucu Hatası: ${response.status}`);
           }
 
           const data = await response.json();
           removeMessage(loadingId);
-          appendMessage("Qwen AI", data.choices[0].message.content);
+          
+          const botName = selectedMode.includes("groq") ? "Groq AI" : "Qwen AI";
+          appendMessage(botName, data.choices[0].message.content);
 
         } catch (error) {
           console.error(error);
