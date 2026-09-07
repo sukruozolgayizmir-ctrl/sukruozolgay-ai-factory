@@ -3,16 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kişisel AI Studio</title>
+  <title>Kişisel AI Studio - Hugging Face Edition</title>
   <style>
     :root {
-      --primary-color: #2563eb;
+      --primary-color: #ffd21e;
       --bg-main: #f8fafc;
       --bg-card: #ffffff;
       --text-main: #0f172a;
       --text-muted: #64748b;
       --border-color: #e2e8f0;
-      --msg-user: #dbeafe;
+      --msg-user: #fef08a;
       --msg-ai: #f1f5f9;
       --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
     }
@@ -23,7 +23,7 @@
       --text-main: #f8fafc;
       --text-muted: #94a3b8;
       --border-color: #334155;
-      --msg-user: #1e3a8a;
+      --msg-user: #854d0e;
       --msg-ai: #334155;
       --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
     }
@@ -63,10 +63,10 @@
       gap: 12px;
     }
 
-    .brand { font-size: 1.2rem; font-weight: 700; color: var(--primary-color); }
+    .brand { font-size: 1.2rem; font-weight: 700; color: #d97706; }
     .toolbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 
-    select, button, input[type="color"] {
+    select, button {
       padding: 8px 12px;
       border-radius: 8px;
       border: 1px solid var(--border-color);
@@ -119,30 +119,24 @@
       font-size: 0.95rem;
     }
 
-    #send-btn { background-color: var(--primary-color); color: white; border: none; font-weight: 600; padding: 0 20px; }
+    #send-btn { background-color: #d97706; color: white; border: none; font-weight: 600; padding: 0 20px; }
   </style>
 </head>
 <body>
 
   <div class="app-container">
     <header>
-      <div class="brand">⚡ AI Studio</div>
+      <div class="brand">🤗 HF AI Studio</div>
       
       <div class="toolbar">
         <select id="model-select">
-          <optgroup label="Groq (Ücretsiz & Ultra Hızlı)">
-            <option value="groq-flash">Groq Flash (Llama 8B Instant)</option>
-            <option value="groq-pro">Groq Pro (Llama 70B Versatile)</option>
-            <option value="groq-extended">Groq Extended (DeepSeek R1 Distill)</option>
-          </optgroup>
-          <optgroup label="OpenRouter (Ücretsiz Katman)">
-            <option value="qwen-flash">Qwen Flash (2.5 7B)</option>
-            <option value="qwen-pro">Qwen Pro (2.5 72B)</option>
-          </optgroup>
+          <option value="Qwen/Qwen2.5-72B-Instruct">Qwen 2.5 72B (Çok Güçlü)</option>
+          <option value="Qwen/Qwen2.5-7B-Instruct">Qwen 2.5 7B (Hızlı)</option>
+          <option value="meta-llama/Llama-3.1-8B-Instruct">Llama 3.1 8B</option>
+          <option value="deepseek-ai/DeepSeek-R1-Distill-Qwen-32B">DeepSeek R1 32B</option>
         </select>
 
-        <button id="reset-keys-btn" class="reset-btn">🔑 Key Sıfırla</button>
-        <input type="color" id="primary-color-picker" value="#2563eb">
+        <button id="reset-keys-btn" class="reset-btn">🔑 HF Key Sıfırla</button>
         <button id="theme-toggle">🌙 Gece</button>
       </div>
     </header>
@@ -162,13 +156,11 @@
       const sendBtn = document.getElementById("send-btn");
       const modelSelect = document.getElementById("model-select");
       const themeToggle = document.getElementById("theme-toggle");
-      const colorPicker = document.getElementById("primary-color-picker");
       const resetKeysBtn = document.getElementById("reset-keys-btn");
 
       resetKeysBtn.addEventListener("click", () => {
-        localStorage.removeItem("MY_GROQ_KEY");
-        localStorage.removeItem("MY_OPENROUTER_KEY");
-        alert("Kayıtlı API anahtarları silindi. Sayfayı yenileyip tekrar deneyin.");
+        localStorage.removeItem("MY_HF_KEY");
+        alert("Hugging Face API anahtarı silindi. Sayfayı yenileyip yeni anahtarı girebilirsiniz.");
       });
 
       const savedTheme = localStorage.getItem("APP_THEME") || "light";
@@ -183,22 +175,13 @@
         themeToggle.textContent = newTheme === "dark" ? "☀️ Gündüz" : "🌙 Gece";
       });
 
-      const savedColor = localStorage.getItem("APP_COLOR") || "#2563eb";
-      document.documentElement.style.setProperty("--primary-color", savedColor);
-      colorPicker.value = savedColor;
-
-      colorPicker.addEventListener("input", (e) => {
-        document.documentElement.style.setProperty("--primary-color", e.target.value);
-        localStorage.setItem("APP_COLOR", e.target.value);
-      });
-
-      function getApiKey(keyName, promptText) {
-        let key = localStorage.getItem(keyName);
+      function getApiKey() {
+        let key = localStorage.getItem("MY_HF_KEY");
         if (!key) {
-          key = prompt(promptText);
+          key = prompt("Hugging Face Access Token girin (hf_...):");
           if (key && key.trim() !== "") {
             key = key.trim();
-            localStorage.setItem(keyName, key);
+            localStorage.setItem("MY_HF_KEY", key);
           } else {
             alert("API anahtarı girilmedi.");
             return null;
@@ -211,45 +194,33 @@
         const promptText = userInput.value.trim();
         if (!promptText) return;
 
-        const selectedMode = modelSelect.value;
-        let apiUrl = "";
-        let apiKey = "";
-        let modelName = "";
-        let headers = { "Content-Type": "application/json" };
-
-        if (selectedMode.startsWith("groq")) {
-          apiKey = getApiKey("MY_GROQ_KEY", "Groq API Anahtarınızı girin (console.groq.com):");
-          apiUrl = "https://api.groq.com/openai/v1/chat/completions";
-
-          if (selectedMode === "groq-flash") modelName = "llama-3.1-8b-instant";
-          else if (selectedMode === "groq-pro") modelName = "llama-3.3-70b-versatile";
-          else if (selectedMode === "groq-extended") modelName = "deepseek-r1-distill-llama-70b";
-
-        } else if (selectedMode.startsWith("qwen")) {
-          apiKey = getApiKey("MY_OPENROUTER_KEY", "OpenRouter API Anahtarınızı girin:");
-          apiUrl = "https://openrouter.ai/api/v1/chat/completions";
-          headers["HTTP-Referer"] = window.location.origin;
-          headers["X-Title"] = "Personal AI Studio";
-
-          if (selectedMode === "qwen-flash") modelName = "qwen/qwen-2.5-7b-instruct:free";
-          else if (selectedMode === "qwen-pro") modelName = "qwen/qwen-2.5-72b-instruct:free";
-        }
-
+        const apiKey = getApiKey();
         if (!apiKey) return;
-        headers["Authorization"] = `Bearer ${apiKey}`;
+
+        const modelName = modelSelect.value;
+        const apiUrl = `https://api-inference.huggingface.co/models/${modelName}/v1/chat/completions`;
 
         appendMessage("Sen", promptText, "user");
         userInput.value = "";
         
-        const loadingId = appendMessage("Yapay Zeka", "Düşünüyor...", "ai");
+        const loadingId = appendMessage("Yapay Zeka", "Hugging Face yanıtlıyor...", "ai");
+
+        const systemPrompt = "Bugünün tarihi 7 Eylül 2026. Kullanıcıya Türkçe olarak yanıt ver.";
 
         try {
           const response = await fetch(apiUrl, {
             method: "POST",
-            headers: headers,
+            headers: {
+              "Authorization": `Bearer ${apiKey}`,
+              "Content-Type": "application/json"
+            },
             body: JSON.stringify({
               model: modelName,
-              messages: [{ role: "user", content: promptText }]
+              messages: [
+                { role: "system", content: systemPrompt },
+                { role: "user", content: promptText }
+              ],
+              max_tokens: 1000
             })
           });
 
@@ -257,35 +228,24 @@
 
           if (!response.ok) {
             let errText = `Hata Kodu: ${response.status}`;
-            try {
-              const errData = await response.json();
-              if (errData.error && errData.error.message) {
-                errText += ` - ${errData.error.message}`;
-              }
-            } catch (e) {}
-
             if (response.status === 401) {
-              const keyName = selectedMode.startsWith("groq") ? "MY_GROQ_KEY" : "MY_OPENROUTER_KEY";
-              localStorage.removeItem(keyName);
-              errText += " (Hatalı Anahtar Silindi, Sayfayı Yenileyip Tekrar Girin)";
+              localStorage.removeItem("MY_HF_KEY");
+              errText += " - Geçersiz veya eksik Token! (Key silindi, yenileyip tekrar girin)";
+            } else if (response.status === 503) {
+              errText += " - Model şu an yükleniyor, lütfen 10 saniye sonra tekrar deneyin.";
             }
             throw new Error(errText);
           }
 
           const data = await response.json();
+          const reply = data.choices[0].message.content;
           const label = modelSelect.options[modelSelect.selectedIndex].text;
-          appendMessage(label, data.choices[0].message.content, "ai");
+          appendMessage(label, reply, "ai");
 
         } catch (error) {
           removeMessage(loadingId);
-          console.error("Detaylı Hata:", error);
-          
-          let showMsg = error.message;
-          if (error.name === "TypeError" && error.message.includes("fetch")) {
-            showMsg = "Bağlantı Engellendi! Tarayıcınızdaki Reklam Engelleyiciyi (AdBlock/Brave Shield) kapatıp tekrar deneyin.";
-          }
-          
-          appendMessage("Sistem Hatası", showMsg, "error");
+          console.error("Hata:", error);
+          appendMessage("Sistem Hatası", error.message, "error");
         }
       }
 
