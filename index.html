@@ -208,14 +208,12 @@
       const colorPicker = document.getElementById("primary-color-picker");
       const resetKeysBtn = document.getElementById("reset-keys-btn");
 
-      // --- Key Sıfırlama ---
       resetKeysBtn.addEventListener("click", () => {
         localStorage.removeItem("MY_GROQ_KEY");
         localStorage.removeItem("MY_OPENROUTER_KEY");
         alert("Kayıtlı tüm API anahtarları silindi. Yeni istek attığınızda tekrar sorulacak.");
       });
 
-      // --- Tema ve Renk ---
       const savedTheme = localStorage.getItem("APP_THEME") || "light";
       document.documentElement.setAttribute("data-theme", savedTheme);
       themeToggle.textContent = savedTheme === "dark" ? "☀️ Gündüz" : "🌙 Gece";
@@ -237,7 +235,6 @@
         localStorage.setItem("APP_COLOR", e.target.value);
       });
 
-      // --- Key Yönetimi ---
       function getApiKey(keyName, promptText) {
         let key = localStorage.getItem(keyName);
         if (!key) {
@@ -252,7 +249,6 @@
         return key;
       }
 
-      // --- Mesaj Gönderme ---
       async function handleSendMessage() {
         const promptText = userInput.value.trim();
         if (!promptText) return;
@@ -268,7 +264,7 @@
           apiUrl = "https://api.groq.com/openai/v1/chat/completions";
 
           if (selectedMode === "groq-flash") modelName = "llama-3.1-8b-instant";
-          else if (selectedMode === "groq-pro") modelName = "llama-3.3-70b-versatile";
+          else if (selectedMode === "groq-pro") modelName = "llama-3.1-70b-versatile";
           else if (selectedMode === "groq-extended") modelName = "deepseek-r1-distill-llama-70b";
 
         } else if (selectedMode.startsWith("qwen")) {
@@ -342,7 +338,7 @@
         
         chatBox.appendChild(msgDiv);
         chatBox.scrollTop = chatBox.scrollHeight;
-        return msgId;
+        return messageId;
       }
 
       function removeMessage(id) {
