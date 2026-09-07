@@ -1,99 +1,162 @@
-// Kişisel ve Güvenli AI Asistanı - script.js
-
-document.addEventListener("DOMContentLoaded", () => {
-  const sendButton = document.getElementById("send-button");
-  const userInput = document.getElementById("user-input");
-  const chatBox = document.getElementById("chat-box");
-  const API_URL = "https://openrouter.ai/api/v1/chat/completions";
-
-  // API Anahtarını sadece senin cihazının hafızasından alır
-  function getPersonalApiKey() {
-    let key = localStorage.getItem("MY_OPENROUTER_KEY");
-    
-    if (!key) {
-      key = prompt("Sisteme sadece sen erişebilirsin. Lütfen OpenRouter API Anahtarını girin:");
-      if (key && key.trim() !== "") {
-        localStorage.setItem("MY_OPENROUTER_KEY", key.trim());
-      } else {
-        alert("API anahtarı girilmediği için sistem çalışmayacaktır.");
-        return null;
-      }
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kişisel AI Asistanı</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 30px auto;
+      padding: 0 15px;
+      background-color: #f4f6f8;
     }
-    return key;
-  }
+    h2 {
+      color: #333;
+      text-align: center;
+    }
+    #chat-box {
+      border: 1px solid #ddd;
+      height: 450px;
+      overflow-y: auto;
+      padding: 15px;
+      background: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      margin-bottom: 15px;
+    }
+    .input-container {
+      display: flex;
+      gap: 10px;
+    }
+    #user-input {
+      flex: 1;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 15px;
+      outline: none;
+    }
+    #send-button {
+      padding: 12px 24px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: bold;
+    }
+    #send-button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
 
-  async function handleSendMessage() {
-    const promptText = userInput.value.trim();
-    if (!promptText) return;
+  <h2>Kişisel Qwen AI Asistanı</h2>
+  <div id="chat-box"></div>
+  <div class="input-container">
+    <input type="text" id="user-input" placeholder="Mesajınızı yazın..." />
+    <button id="send-button">Gönder</button>
+  </div>
 
-    const apiKey = getPersonalApiKey();
-    if (!apiKey) return;
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const sendButton = document.getElementById("send-button");
+      const userInput = document.getElementById("user-input");
+      const chatBox = document.getElementById("chat-box");
+      const API_URL = "https://openrouter.ai/api/v1/chat/completions";
 
-    // Kullanıcı mesajını ekrana yaz
-    appendMessage("Sen", promptText);
-    userInput.value = "";
-    
-    const loadingId = appendMessage("Qwen AI", "Düşünüyor...", true);
-
-    try {
-      const response = await fetch(API_URL, {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${apiKey}`,
-          "Content-Type": "application/json",
-          "HTTP-Referer": window.location.origin,
-          "X-Title": "Personal AI Assistant"
-        },
-        body: JSON.stringify({
-          model: "qwen/qwen-2.5-72b-instruct", // Kullanmak istediğin model
-          messages: [{ role: "user", content: promptText }]
-        })
-      });
-
-      if (!response.ok) {
-        if (response.status === 401) {
-          localStorage.removeItem("MY_OPENROUTER_KEY"); // Hatalı anahtar girildiyse sıfırla
-          throw new Error("API Anahtarı geçersiz. Sayfayı yenileyip tekrar girin.");
+      function getPersonalApiKey() {
+        let key = localStorage.getItem("MY_OPENROUTER_KEY");
+        if (!key) {
+          key = prompt("Sisteme sadece sen erişabilirsin. Lütfen OpenRouter API Anahtarını girin:");
+          if (key && key.trim() !== "") {
+            localStorage.setItem("MY_OPENROUTER_KEY", key.trim());
+          } else {
+            alert("API anahtarı girilmediği için sistem çalışmayacaktır.");
+            return null;
+          }
         }
-        throw new Error(`Sunucu Hatası: ${response.status}`);
+        return key;
       }
 
-      const data = await response.json();
-      removeMessage(loadingId);
-      appendMessage("Qwen AI", data.choices[0].message.content);
+      async function handleSendMessage() {
+        const promptText = userInput.value.trim();
+        if (!promptText) return;
 
-    } catch (error) {
-      console.error(error);
-      removeMessage(loadingId);
-      appendMessage("Sistem Hata", error.message || "Bağlantı kurulamadı.");
-    }
-  }
+        const apiKey = getPersonalApiKey();
+        if (!apiKey) return;
 
-  function appendMessage(sender, text, isLoading = false) {
-    if (!chatBox) return;
-    const messageDiv = document.createElement("div");
-    const messageId = "msg-" + Date.now();
-    messageDiv.id = messageId;
-    messageDiv.style.margin = "10px 0";
-    messageDiv.style.padding = "8px 12px";
-    messageDiv.style.borderRadius = "5px";
-    messageDiv.style.backgroundColor = sender === "Sen" ? "#e3f2fd" : "#f5f5f5";
-    
-    messageDiv.innerHTML = `<strong>${sender}:</strong> ${text}`;
-    chatBox.appendChild(messageDiv);
-    chatBox.scrollTop = chatBox.scrollHeight;
-    return messageId;
-  }
+        appendMessage("Sen", promptText);
+        userInput.value = "";
+        
+        const loadingId = appendMessage("Qwen AI", "Düşünüyor...", true);
 
-  function removeMessage(id) {
-    const element = document.getElementById(id);
-    if (element) element.remove();
-  }
+        try {
+          const response = await fetch(API_URL, {
+            method: "POST",
+            headers: {
+              "Authorization": `Bearer ${apiKey}`,
+              "Content-Type": "application/json",
+              "HTTP-Referer": window.location.origin,
+              "X-Title": "Personal AI Assistant"
+            },
+            body: JSON.stringify({
+              model: "qwen/qwen-2.5-72b-instruct",
+              messages: [{ role: "user", content: promptText }]
+            })
+          });
 
-  if (sendButton && userInput) {
-    sendButton.addEventListener("click", handleSendMessage);
-    userInput.addEventListener("keypress", (e) => {
-      if (e.key === "Enter") handleSendMessage();
+          if (!response.ok) {
+            if (response.status === 401) {
+              localStorage.removeItem("MY_OPENROUTER_KEY");
+              throw new Error("API Anahtarı geçersiz. Sayfayı yenileyip tekrar girin.");
+            }
+            throw new Error(`Sunucu Hatası: ${response.status}`);
+          }
+
+          const data = await response.json();
+          removeMessage(loadingId);
+          appendMessage("Qwen AI", data.choices[0].message.content);
+
+        } catch (error) {
+          console.error(error);
+          removeMessage(loadingId);
+          appendMessage("Sistem Hata", error.message || "Bağlantı kurulamadı.");
+        }
+      }
+
+      function appendMessage(sender, text, isLoading = false) {
+        if (!chatBox) return;
+        const messageDiv = document.createElement("div");
+        const messageId = "msg-" + Date.now();
+        messageDiv.id = messageId;
+        messageDiv.style.margin = "10px 0";
+        messageDiv.style.padding = "10px 14px";
+        messageDiv.style.borderRadius = "6px";
+        messageDiv.style.backgroundColor = sender === "Sen" ? "#e3f2fd" : "#f1f3f4";
+        
+        messageDiv.innerHTML = `<strong>${sender}:</strong> ${text}`;
+        chatBox.appendChild(messageDiv);
+        chatBox.scrollTop = chatBox.scrollHeight;
+        return messageId;
+      }
+
+      function removeMessage(id) {
+        const element = document.getElementById(id);
+        if (element) element.remove();
+      }
+
+      if (sendButton && userInput) {
+        sendButton.addEventListener("click", handleSendMessage);
+        userInput.addEventListener("keypress", (e) => {
+          if (e.key === "Enter") handleSendMessage();
+        });
+      }
     });
-  }
-});
+  </script>
+</body>
+</html>
