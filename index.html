@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kişisel AI Studio</title>
+  <title>Kişisel AI Studio - %100 Ücretsiz</title>
   <style>
     :root {
       --primary-color: #2563eb;
@@ -185,19 +185,18 @@
 
   <div class="app-container">
     <header>
-      <div class="brand">⚡ AI Studio</div>
+      <div class="brand">⚡ AI Studio (%100 Bedava)</div>
       
       <div class="toolbar">
         <select id="model-select">
-          <optgroup label="Qwen (OpenRouter)">
-            <option value="qwen-flash">Qwen Flash (Hızlı / 7B)</option>
-            <option value="qwen-pro">Qwen Pro (Gelişmiş / 72B)</option>
-            <option value="qwen-online">Qwen Pro Web (Canlı İnternet Aramalı)</option>
-          </optgroup>
-          <optgroup label="Groq (Ultra Hızlı)">
+          <optgroup label="Groq (Tamamen Ücretsiz / Sınırsız)">
             <option value="groq-flash">Groq Flash (Llama 8B Instant)</option>
             <option value="groq-pro">Groq Pro (Llama 70B Versatile)</option>
             <option value="groq-extended">Groq Extended (DeepSeek R1 Distill)</option>
+          </optgroup>
+          <optgroup label="OpenRouter (Ücretsiz Kotada)">
+            <option value="qwen-flash">Qwen Flash (2.5 7B Free)</option>
+            <option value="qwen-pro">Qwen Pro (2.5 72B Free)</option>
           </optgroup>
         </select>
 
@@ -275,22 +274,22 @@
         let apiKey = "";
         let modelName = "";
 
-        // Model Seçim Mantığı
-        if (selectedMode.startsWith("qwen")) {
-          apiKey = getApiKey("MY_OPENROUTER_KEY", "OpenRouter API Anahtarınızı girin:");
-          apiUrl = "https://openrouter.ai/api/v1/chat/completions";
-          
-          if (selectedMode === "qwen-flash") modelName = "qwen/qwen-2.5-7b-instruct";
-          else if (selectedMode === "qwen-pro") modelName = "qwen/qwen-2.5-72b-instruct";
-          else if (selectedMode === "qwen-online") modelName = "qwen/qwen-2.5-72b-instruct:online";
-
-        } else if (selectedMode.startsWith("groq")) {
+        // Kesinlikle 0 Maliyetli Model Yönlendirmeleri
+        if (selectedMode.startsWith("groq")) {
           apiKey = getApiKey("MY_GROQ_KEY", "Groq API Anahtarınızı girin (console.groq.com):");
           apiUrl = "https://api.groq.com/openai/v1/chat/completions";
 
           if (selectedMode === "groq-flash") modelName = "llama-3.1-8b-instant";
           else if (selectedMode === "groq-pro") modelName = "llama-3.3-70b-versatile";
           else if (selectedMode === "groq-extended") modelName = "deepseek-r1-distill-llama-70b";
+
+        } else if (selectedMode.startsWith("qwen")) {
+          apiKey = getApiKey("MY_OPENROUTER_KEY", "OpenRouter API Anahtarınızı girin:");
+          apiUrl = "https://openrouter.ai/api/v1/chat/completions";
+          
+          // OpenRouter üzerinde sadece explicit :free etiketli sunucular çağrılır
+          if (selectedMode === "qwen-flash") modelName = "qwen/qwen-2.5-7b-instruct:free";
+          else if (selectedMode === "qwen-pro") modelName = "qwen/qwen-2.5-72b-instruct:free";
         }
 
         if (!apiKey) return;
@@ -315,9 +314,9 @@
 
           if (!response.ok) {
             if (response.status === 401) {
-              const keyToRemove = selectedMode.startsWith("qwen") ? "MY_OPENROUTER_KEY" : "MY_GROQ_KEY";
+              const keyToRemove = selectedMode.startsWith("groq") ? "MY_GROQ_KEY" : "MY_OPENROUTER_KEY";
               localStorage.removeItem(keyToRemove);
-              throw new Error("Geçersiz API Anahtarı. Anahtar silindi, tekrar deneyin.");
+              throw new Error("Geçersiz API Anahtarı. Sıfırlandı, tekrar deneyin.");
             }
             throw new Error(`Sunucu Hatası: ${response.status}`);
           }
@@ -348,7 +347,7 @@
         
         chatBox.appendChild(msgDiv);
         chatBox.scrollTop = chatBox.scrollHeight;
-        return msgId;
+        return messageId;
       }
 
       function removeMessage(id) {
